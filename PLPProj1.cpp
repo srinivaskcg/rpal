@@ -1,20 +1,33 @@
-//============================================================================
-// Name        : PLPProj1.cpp
-// Author      : Saurabh Saxena
-// UFID        : 21817195
-// Version     :
-// Copyright   : Your copyright notice
-// Description : Hello World in C++, Ansi-style
-//============================================================================
-
 #include <iostream>
+#include <fstream>
 #include <stdio.h>
 #include <string.h>
-#include "FileReader.h"
 #include "LexicalAnalyzer.h"
 #include "RecursiveParser.h"
 
 using namespace std;
+
+string openFile(char* fileName){
+	
+	string fileContent;
+	string nextLine;
+
+	cout << fileName;
+	ifstream inputFile;
+
+	inputFile.open(fileName);
+	
+	if(inputFile.fail())
+		cerr << "Error: Problem opening input file";
+
+	if(inputFile.is_open()){
+		while(inputFile.good()){
+			getline(inputFile,nextLine);
+			fileContent +=  nextLine;
+		}
+	}
+	return fileContent;
+}
 
 int main(int argc,char *argv[]) {
 	if(argc < 3){
@@ -22,6 +35,7 @@ int main(int argc,char *argv[]) {
 		return 0;
 	}
 	int i;
+	char* input;
 	bool astFound = false;
 	for(int i=0;i<argc;i++){
 		//cout <<argv[i]<<endl;
@@ -31,11 +45,14 @@ int main(int argc,char *argv[]) {
 		}
 	}
 	if(astFound == true){
-		FileReader fr(argv[argc-1]);
-		string fileContent = fr.getFileContent();
-		if(fileContent.size() == 0)
+		
+		input = argv[2];
+		cout << input << endl;
+		string codeString = openFile(input);
+
+		if(codeString.size() == 0)
 			return 0;
-		LexicalAnalyzer la(fileContent);
+		LexicalAnalyzer la(codeString);
 		RecursiveParser rp(la);
 		rp.parse();
 		rp.printTree();
