@@ -9,6 +9,7 @@
 #include "LexicalAnalyzer.h"
 #include "Token.h"
 #include <string>
+#include <set>
 #include <cstdlib>
 
 using namespace std;
@@ -152,25 +153,29 @@ Token LexicalAnalyzer::peekNextToken(){
 
 
 bool LexicalAnalyzer::isoperator(char ch){
-	char operators[] = {'+','-','*','<','>','&','.','@','/',':','=','-','|','$','!','#','%','^','_','[',']','{','}','"','`','?'};
-	int i;
-	for(i=0;i<26;i++){
-		if(ch==operators[i])
-			return true;
-	}
+
+	char char_set[] = {'+','-','*','<','>','&','.','@','/',':','=','-','|','$','!','#','%','^','_','[',']','{','}','"','`','?'};
+	
+	set<char> ops;   
+	ops.insert(char_set, char_set+26);
+
+	if(ops.count(ch) > 0)
+		return true;
+
 	return false;
 }
 
+bool LexicalAnalyzer::isKeyword(string tokenValue){
+	
+	string keyword_set[] = {"let","in","fn","where","aug","or","not","gr","ge","ls","le","eq","ne","true","false","nil","dummy",
+							"within","and","rec","list"};
 
-bool LexicalAnalyzer::isKeyword(std::string tokenValue){
-	std::string keywords[] = {"let","where","aug","or","not","gr","ge","ls","le","eq","ne","true","false","nil","dummy","in","fn"
-						,"within","and","rec","list"};
-	int i;
-	for(i=0;i<21;i++){
-		if(tokenValue == keywords[i]){
-			return true;
-		}
-	}
+	set<string> keys;   
+	keys.insert(keyword_set, keyword_set+21);
+
+	if(keys.count(tokenValue) > 0)
+		return true;
+
 	return false;
 }
 
