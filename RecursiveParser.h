@@ -1,4 +1,3 @@
-
 #ifndef RECURSIVEPARSER_H_
 #define RECURSIVEPARSER_H_
 
@@ -6,12 +5,12 @@
 #include "Token.h"
 #include "TreeNode.h"
 #include "LexicalAnalyzer.h"
-#include "Stack.h"
+#include <stack>
 #include <cstdlib>
 
 using namespace std;
 
-class RecursiveParser
+class Parser
 {
 	private:
 		static string ID;
@@ -21,38 +20,39 @@ class RecursiveParser
 		static string OPT;
 		LexicalAnalyzer la;
 		bool moreTokens;
-		Stack stack;
+		stack<TreeNode *> trees;
 		Token nextToken;
+		void addRightChild(TreeNode* t);
 		void formattedPrint(Token t,std::string dots);
 		void preOrder(TreeNode* t, std::string dots);
 		void read(Token token);
 		void buildTree(Token token, int numOfNodes);
-		void parseE();
-		void parseEw();
-		void parseT();
-		void parseTa();
-		void parseTc();
-		void parseB();
-		void parseBt();
-		void parseBs();
-		void parseBp();
-		void parseA();
-		void parseAt();
-		void parseAf();
-		void parseAp();
-		void parseR();
-		void parseRn();
-		void parseD();
-		void parseDa();
-		void parseDr();
-		void parseDb();
-		void parseVb();
-		void parseV1();
-		void parseBpHelper(Token nextToken, string tokenValue);
-		void parseRHelper(Token t, string value);
+		void E();
+		void Ew();
+		void T();
+		void Ta();
+		void Tc();
+		void B();
+		void Bt();
+		void Bs();
+		void Bp();
+		void A();
+		void At();
+		void Af();
+		void Ap();
+		void R();
+		void Rn();
+		void D();
+		void Da();
+		void Dr();
+		void Db();
+		void Vb();
+		void Vl();
+		void BpHelper(Token nextToken, string tokenValue);
+		void RHelper(Token t, string value);
 	public:
-		RecursiveParser(LexicalAnalyzer la);
-		~RecursiveParser();
+		Parser(LexicalAnalyzer la);
+		~Parser();
 		void printTree();
 		void parse();
 };

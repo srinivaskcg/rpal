@@ -1,27 +1,33 @@
-// UFID        : 21817195
-// Author 	   : Saurabh Saxena
 #include <iostream>
 #include "RecursiveParser.h"
+#include <stack>
 #include "Token.h"
 
 using namespace std;
 
-string RecursiveParser::ID = "IDENTIFIER";
-string RecursiveParser::STR = "STRING";
-string RecursiveParser::INT = "INT";
-string RecursiveParser::KEY = "KEYWORD";
-string RecursiveParser::OPT = "OPERATOR";
+string Parser::ID = "IDENTIFIER";
+string Parser::STR = "STRING";
+string Parser::INT = "INT";
+string Parser::KEY = "KEYWORD";
+string Parser::OPT = "OPERATOR";
 
-RecursiveParser::RecursiveParser(LexicalAnalyzer la){
+Parser::Parser(LexicalAnalyzer la){
 	this->la = la;
 	this->moreTokens = true;
 }
 
-RecursiveParser::~RecursiveParser(){
+Parser::~Parser(){
 
 }
 
-void RecursiveParser::read(Token token){
+void Parser::addRightChild(TreeNode* treeNode){
+	TreeNode* parentNode = trees.top();
+	trees.pop();
+	parentNode->right = treeNode;
+	trees.push(parentNode);
+}
+
+void Parser::read(Token token){
 
 	//cout << "Inside read" << "\t" <<token.type << "\t" << token.value << "\t" << nextToken.value<< endl;
 	if(moreTokens == false)
@@ -34,14 +40,11 @@ void RecursiveParser::read(Token token){
 		buildTree(token, 0);
 	}
 	try{
-
 		//cout << la.currPtr << "\t" << la.tokens.size() << endl;
 		if(la.currPtr == la.tokens.size())
 			throw "No more tokens";
 
 		nextToken = la.getNextToken();
-
-		//cout << "back" << nextToken.value << endl;
 	}catch(const char* message){
 		moreTokens = false;
 		Token endToken("$$","$$");
@@ -50,7 +53,7 @@ void RecursiveParser::read(Token token){
 }
 
 
-void RecursiveParser::buildTree(Token token, int numOfNodes){
+void Parser::buildTree(Token token, int numOfNodes){
 	//cout<< "Inside buildTree "<< token.value<<endl;
 	//cout<< "Stack size:"<<stack.getSize()<<endl;
 	TreeNode* newNode = new TreeNode;
@@ -59,27 +62,29 @@ void RecursiveParser::buildTree(Token token, int numOfNodes){
 		int i;
 		for(i=0;i<numOfNodes-1;i++){
 			//cout<<"Count "+i<<endl;
-			TreeNode* curr = stack.pop();
-			stack.addRightChild(curr);
+			TreeNode* curr = trees.top();
+			trees.pop();
+			addRightChild(curr);
 		}
-		TreeNode* top = stack.pop();
+		TreeNode* top = trees.top();
+		trees.pop();
 		if(top != NULL)
 			newNode->left = top;
 	}
-	stack.push(newNode);
+	trees.push(newNode);
 }
 
 
-void RecursiveParser::parseE(){
-	//cout<<"Inside parseE()"<<endl;
+void Parser::E(){
+	//cout<<"Inside E()"<<endl;
 	if(nextToken.value == "let"){
 		Token letToken("let",KEY);
-		//cout << "In parse E" << endl;
+		//cout << "In E" << endl;
 		read(letToken);
-		parseD();
+		D();
 		Token inToken("in",KEY);
 		read(inToken);
-		parseE();
+		E();
 		Token nodeToken("let","let");
 		buildTree(nodeToken,2);
 	} else if(nextToken.value == "fn"){
@@ -87,43 +92,43 @@ void RecursiveParser::parseE(){
 		read(fnToken);
 		int n=0;
 		do{
-			parseVb();
+			Vb();
 			n++;
 		}while(nextToken.type == ID or nextToken.type == "(");
 		Token dotToken(".",OPT);
 		read(dotToken);
-		parseE();
+		E();
 		Token nodeToken("lambda","lambda");
 		buildTree(nodeToken,n+1);
 	} else{
-		parseEw();
+		Ew();
 	}
-	//cout<<"End of parseE()"<<endl;
+	//cout<<"End of E()"<<endl;
 }
 
-void RecursiveParser::parseEw(){
-	//cout<<"Inside parseEw()"<<endl;
-	parseT();
+void Parser::Ew(){
+	//cout<<"Inside Ew()"<<endl;
+	T();
 	if(nextToken.value == "where"){
 		Token t("where",KEY);
 		read(t);
-		parseDr();
+		Dr();
 		Token nodeToken("where","where");
 		buildTree(nodeToken,2);
 	}
-	//cout<<"End of parseEw()"<<endl;
+	//cout<<"End of Ew()"<<endl;
 }
 
 
 
-void RecursiveParser::parseT(){
+void Parser::T(){
 	//cout<<"Inside parseT()"<<endl;
-	parseTa();
+	Ta();
 	if(nextToken.value == ","){
 		int n = 0;
 		do{
 			read(nextToken);
-			parseTa();
+			Ta();
 			n++;
 		}while(nextToken.value == ",");
 		Token tauToken("tau","tau");
@@ -132,176 +137,176 @@ void RecursiveParser::parseT(){
 	//cout<<"End of parseT()"<<endl;
 }
 
-void RecursiveParser::parseTa(){
+void Parser::Ta(){
 	//cout<<"Inside parseTa()"<<endl;
-	parseTc();
+	Tc();
 	while(nextToken.value == "aug"){
 		Token temp = nextToken;
 		read(nextToken);
-		parseTc();
+		Tc();
 		buildTree(temp,2);
 	}
 	//cout<<"End of parseTa()"<<endl;
 }
 
-void RecursiveParser::parseTc(){
+void Parser::Tc(){
 	//cout<<"Inside parseTc()"<<endl;
-	parseB();
+	B();
 	if(nextToken.value == "->"){
 		read(nextToken);
-		parseTc();
+		Tc();
 		Token elseToken("|",OPT);
 		read(elseToken);
-		parseTc();
+		Tc();
 		Token nodeToken("->","->");
 		buildTree(nodeToken,3);
 	}
 	//cout<<"End of parseTc()"<<endl;
 }
 
-void RecursiveParser::parseB(){
+void Parser::B(){
 	//cout<<"Inside parseB()"<<endl;
-	parseBt();
+	Bt();
 	while(nextToken.value == "or"){
 		Token temp = nextToken;
 		read(nextToken);
-		parseBt();
+		Bt();
 		buildTree(temp,2);
 	}
 	//cout<<"End of parseB()"<<endl;
 }
 
-void RecursiveParser::parseBt(){
+void Parser::Bt(){
 	//cout<<"Inside parseBt()"<<endl;
-	parseBs();
+	Bs();
 	while(nextToken.value == "&"){
 		Token temp = nextToken;
 		read(nextToken);
-		parseBs();
+		Bs();
 		buildTree(temp,2);
 	}
 	//cout<<"End of parseBt()"<<endl;
 }
 
-void RecursiveParser::parseBs(){
+void Parser::Bs(){
 	//cout<<"Inside parseBs()"<<endl;
 	if(nextToken.value == "not"){
 		Token temp = nextToken;
 		read(nextToken);
-		parseBp();
+		Bp();
 		buildTree(temp,1);
 	}else{
-		parseBp();
+		Bp();
 	}
 	//cout<<"End of parseBs()"<<endl;
 }
 
-void RecursiveParser::parseBp(){
+void Parser::Bp(){
 	//cout<<"Inside parseBp()"<<endl;
-	parseA();
+	A();
 	if(nextToken.value=="gr" or nextToken.value == ">"){
-		parseBpHelper(nextToken, "gr");
+		BpHelper(nextToken, "gr");
 	}else if(nextToken.value == "ls" or nextToken.value == "<"){
-		parseBpHelper(nextToken,"ls");
+		BpHelper(nextToken,"ls");
 	}else if(nextToken.value =="ge" or nextToken.value == ">=" ){
-		parseBpHelper(nextToken, "ge");
+		BpHelper(nextToken, "ge");
 	}else if(nextToken.value =="le" or nextToken.value == "<=" ){
-		parseBpHelper(nextToken, "le");
+		BpHelper(nextToken, "le");
 	}else if(nextToken.value =="eq" ){
-		parseBpHelper(nextToken, "eq");
+		BpHelper(nextToken, "eq");
 	}else if(nextToken.value =="ne"){
-		parseBpHelper(nextToken, "ne");
+		BpHelper(nextToken, "ne");
 	}
 	//cout<<"End of parseBp()"<<endl;
 }
 
-void RecursiveParser::parseBpHelper(Token nextToken, string tokenValue){
+void Parser::BpHelper(Token nextToken, string tokenValue){
 	//cout<<"Inside parseBpHelper()"<<endl;
 	read(nextToken);
-	parseA();
+	A();
 	Token t(tokenValue, tokenValue);
 	buildTree(t,2);
 	//cout<<"End of parseBpHelper()"<<endl;
 }
 
-void RecursiveParser::parseA(){
+void Parser::A(){
 	//cout<<"Inside parseA()"<<endl;
 	if(nextToken.value == "-"){
 		Token negToken("-",OPT);
 		read(negToken);
-		parseAt();
+		At();
 		Token nodeToken("neg","neg");
 		buildTree(nodeToken,1);
 	}else if(nextToken.value == "+"){
 		Token posToken("+",OPT);
 		read(posToken);
-		parseAt();
+		At();
 	}else{
-		parseAt();
+		At();
 	}
 	while(nextToken.value == "+" or nextToken.value == "-"){
 		Token temp = nextToken;
 		read(nextToken);
-		parseAt();
+		At();
 		buildTree(temp,2);
 	}
 	//cout<<"End of parseA()"<<endl;
 }
 
-void RecursiveParser::parseAt(){
+void Parser::At(){
 	//cout<<"Inside parseAt()"<<endl;
-	parseAf();
+	Af();
 	//cout << nextToken.value << endl;
 	while(nextToken.value == "*" or nextToken.value=="/"){
 		Token temp = nextToken;
 		read(nextToken);
-		parseAf();
+		Af();
 		buildTree(temp,2);
 	}
 	//cout<<"End of parseAt()"<<endl;
 }
 
-void RecursiveParser::parseAf(){
+void Parser::Af(){
 	//cout<<"Inside parseAf()"<<endl;
-	parseAp();
+	Ap();
 	while(nextToken.value == "**"){
 		Token temp = nextToken;
 		read(nextToken);
-		parseAf();
+		Af();
 		buildTree(temp,2);
 	}
 	//cout<<"End of parseAf()"<<endl;
 }
 
-void RecursiveParser::parseAp(){
+void Parser::Ap(){
 	//cout<<"Inside parseAp()"<<endl;
-	parseR();
+	R();
 	while(nextToken.value == "@"){
 		Token temp = nextToken;
 		read(nextToken); //Read '@'
 		if(nextToken.type != ID)
 			throw "Expected Identifier found in parseAp()";
 		read(nextToken); //Read identifier
-		parseR();
+		R();
 		buildTree(temp,3);
 	}
 	//cout<<"End of parseAp()"<<endl;
 }
 
-void RecursiveParser::parseR(){
+void Parser::R(){
 	//cout<<"Inside parseR()"<<endl;
-	parseRn();
+	Rn();
 	while(nextToken.type == ID or nextToken.type == STR or nextToken.type == INT or
 			nextToken.value == "true" or nextToken.value == "false" or nextToken.value == "nil" or
 			nextToken.value == "(" or nextToken.value == "dummy"){
-		parseRn();
+		Rn();
 		Token nodeToken("gamma","gamma");
 		buildTree(nodeToken,2);
 	}
 	//cout<<"End of parseR()"<<endl;
 }
 
-void RecursiveParser::parseRn(){
+void Parser::Rn(){
 	//cout<<"Inside parseRn()"<<endl;
 	//cout << nextToken.value << endl;
 	//cout << "----" << nextToken.type << endl;
@@ -312,23 +317,23 @@ void RecursiveParser::parseRn(){
 			read(nextToken);
 			//cout << "return" << endl;
 	}else if(nextToken.value=="true"){
-		parseRHelper(nextToken, "true");
+		RHelper(nextToken, "true");
 	}else if(nextToken.value == "false"){
-		parseRHelper(nextToken, "false");
+		RHelper(nextToken, "false");
 	}else if(nextToken.value == "nil"){
-		parseRHelper(nextToken, "nil");
+		RHelper(nextToken, "nil");
 	}else if(nextToken.value == "dummy"){
-		parseRHelper(nextToken,"dummy");
+		RHelper(nextToken,"dummy");
 	}else if(nextToken.value == "("){
 		read(nextToken);
-		parseE();
+		E();
 		Token t(")",")");
 		read(t);
 	}
 	//cout<<"End of parseRn()"<<endl;
 }
 
-void RecursiveParser::parseRHelper(Token t, string value){
+void Parser::RHelper(Token t, string value){
 	//cout<<"Inside parseRHelper()"<<endl;
 	read(t);
 	Token nodeToken(value,value);
@@ -336,27 +341,27 @@ void RecursiveParser::parseRHelper(Token t, string value){
 	//cout<<"End of parseRHelper()"<<endl;
 }
 
-void RecursiveParser::parseD(){
+void Parser::D(){
 	//cout<<"Inside parseD()"<<endl;
-	parseDa();
+	Da();
 	if(nextToken.value == "within"){
 		read(nextToken);
-		parseD();
+		D();
 		Token nodeToken("within", "within");
 		buildTree(nodeToken,2);
 	}
 	//cout<<"End of parseD()"<<endl;
 }
 
-void RecursiveParser::parseDa(){
+void Parser::Da(){
 	//cout<<"Inside parseDa()"<<endl;
-	parseDr();
+	Dr();
 	if(nextToken.value== "and"){
 		int n = 1;
 		Token temp = nextToken;
 		while(nextToken.value == "and"){
 			read(nextToken);
-			parseDr();
+			Dr();
 			n++;
 		}
 		buildTree(temp,n);
@@ -364,36 +369,36 @@ void RecursiveParser::parseDa(){
 	//cout<<"End of parseDa()"<<endl;
 }
 
-void RecursiveParser::parseDr(){
+void Parser::Dr(){
 	//cout<<"Inside parseDr()"<<endl;
 	if(nextToken.value == "rec"){
 		Token temp = nextToken;
 		read(nextToken);
-		parseDb();
+		Db();
 		buildTree(temp,1);
 	}else{
-		parseDb();
+		Db();
 	}
 	//cout<<"End of parseDr()"<<endl;
 }
 
-void RecursiveParser::parseDb(){
+void Parser::Db(){
 	//cout<<"Inside parseDb()"<<endl;
 	//cout<<nextToken.type + " "+la.peekNextToken().value <<endl;
 	//Check if the next token is V1
 	if(nextToken.value == "("){
 		//cout << "Inside if";
 		read(nextToken);
-		parseD();
+		D();
 		Token t(")",OPT);
 		read(t);
 	} else if(nextToken.type == ID && (la.peekNextToken().value == "," || la.peekNextToken().value == "=")){
 		// if next token is '=' or ',' then rule is Vl '=' E
 		//cout << "else if";
-		parseV1();
+		Vl();
 		Token t("=",OPT);
 		read(t);
-		parseE();
+		E();
 		//cout<< "Return from E" << endl;
 		Token nodeToken("=","=");
 		buildTree(nodeToken,2);
@@ -402,21 +407,21 @@ void RecursiveParser::parseDb(){
 		//cout << "Else";
 		read(nextToken);
 		int n = 1;
-		parseVb();
+		Vb();
 		while(nextToken.type == ID or nextToken.value== "("){
 			n++;
-			parseVb();
+			Vb();
 		}
 		Token t("=",OPT);
 		read(t);
-		parseE();
+		E();
 		Token nodeToken("function_form", "function_form");
 		buildTree(nodeToken, n+2);
 	}
 	//cout<<"End of parseDb()"<<endl;
 }
 
-void RecursiveParser::parseVb(){
+void Parser::Vb(){
 	//cout<<"Inside parseVb()"<<endl;
 	if(nextToken.type == ID){
 		read(nextToken);
@@ -427,7 +432,7 @@ void RecursiveParser::parseVb(){
 			Token nodeToken("()","()");
 			buildTree(nodeToken,0);
 		}else{
-			parseV1();
+			Vl();
 			Token t(")",")");
 			read(t);
 		}
@@ -435,7 +440,7 @@ void RecursiveParser::parseVb(){
 	//cout<<"End of parseVb()"<<endl;
 }
 
-void RecursiveParser::parseV1(){
+void Parser::Vl(){
 	//cout<<"Inside parseV1()"<<endl;
 	read(nextToken);
 	int n =1;
@@ -452,14 +457,15 @@ void RecursiveParser::parseV1(){
 }
 
 
-void RecursiveParser::printTree(){
+void Parser::printTree(){
 	//cout<<"Stack size: "<<stack.getSize()<<endl;
-	TreeNode* t = stack.pop();
+	TreeNode* t = trees.top();
+	trees.pop();
 	preOrder(t,std::string(""));
 }
 
 
-void RecursiveParser::preOrder(TreeNode* t, std::string dots){
+void Parser::preOrder(TreeNode* t, std::string dots){
 	formattedPrint(t->value,dots);
 	string dots1 = "." + dots;
 	if(t->left != NULL)
@@ -468,7 +474,7 @@ void RecursiveParser::preOrder(TreeNode* t, std::string dots){
 		preOrder(t->right,dots);
 }
 
-void RecursiveParser::formattedPrint(Token t,std::string dots){
+void Parser::formattedPrint(Token t,std::string dots){
 	if(t.type == ID){
 		cout <<dots<<"<ID:"<< t.value<<'>'<<endl;
 	}else if(t.type == INT){
@@ -482,11 +488,11 @@ void RecursiveParser::formattedPrint(Token t,std::string dots){
 	}
 }
 
-void RecursiveParser::parse(){
+void Parser::parse(){
 	la.tokenizeStr();
 	la.currPtr = 0;
 	//cout << "In parse" << endl;
 	nextToken = la.getNextToken();
 	//cout << nextToken.value<<endl;
-	parseE();
+	E();
 }

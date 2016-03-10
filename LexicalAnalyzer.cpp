@@ -1,10 +1,3 @@
-/*
- * LexicalAnalyzer.cpp
- *
- *  Created on: Oct 14, 2011
- *      Author: saurabh Saurabh
- *      // UFID        : 21817195
- */
 #include <iostream>
 #include "LexicalAnalyzer.h"
 #include "Token.h"

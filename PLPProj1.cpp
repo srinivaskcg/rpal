@@ -14,6 +14,8 @@ string openFile(char* fileName){
 	ifstream input_file;
 
 	input_file.open(fileName);
+
+	//cout << fileName << endl;
 	
 	if(input_file.fail())
 		cerr << "Error: Problem opening input file";
@@ -24,9 +26,10 @@ string openFile(char* fileName){
 			file_content +=  next_line + "\n";
 		}
 	}
+	//cout << file_content << endl;
+	input_file.close();
 	return file_content;
 }
-
 
 int main(int argc,char *argv[]) {
 
@@ -58,7 +61,7 @@ int main(int argc,char *argv[]) {
 		}
 
 		LexicalAnalyzer la(code_string);
-		RecursiveParser rp(la);
+		Parser rp(la);
 		rp.parse();
 		rp.printTree();
 	}else{
