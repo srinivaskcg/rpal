@@ -34,7 +34,7 @@ void Lexer::tokenizeStr()
 	//cout << "Inside Tokenizer" << endl;
 	size = codeString.size();
 	//cout << size << endl;
-	readPtr = 0;
+	//readPtr = 0;
 	//If next character is a space, ignore
 	//If next character is a letter, go to case: identifier
 	//If next character is a digit, go to Integer
@@ -56,104 +56,139 @@ void Lexer::tokenizeStr()
 		if(isspace(ch) or ch == '\t' or ch == '\n'){
 			continue;
 		}else if(isalpha(ch)){
-			token.value +=ch;
-			while(true){
-				if(readPtr != size){
-					ch = codeString.at(readPtr++);
-					if(isalpha(ch) or isdigit(ch) or ch == '_'){
-						token.value +=ch;
-					}else{
-						readPtr--;
-						break;
-					}
-				}else{
-					break;
-				}
-			}
-			if(isKeyword(token.value)){
-				token.type = "KEYWORD";
-			}else{
-				token.type = "IDENTIFIER";
-			}
+			token = tokenizeIdentifier(ch);
 		}else if(isdigit(ch)){
-			token.value +=ch;
-			while(true){
-				if(readPtr != size){
-					ch = codeString.at(readPtr++);
-					if(isdigit(ch)){
-						token.value +=ch;
-					}else{
-						readPtr--;
-						break;
-					}
-				}else{
-					break;
-				}
-			}
-			token.type = "INT";
+			token = tokenizeInteger(ch);
 		}else if (isoperator(ch)){
-			if(ch == '/' && codeString.at(readPtr++) == '/'){
-				while(true){
-					ch = codeString.at(readPtr++);
-					if(ch == '\n'){
-						readPtr--;
-						break;
-					}else if(isalpha(ch) or isdigit(ch) or isoperator(ch) or isspace(ch) or ch=='\t'
-							or ch=='\'' or ch == '(' or ch==')' or ch==';' or ch==',' or ch=='\\'){
-						continue;
-					}
-				}
-				continue;
-			}else{
-				if(ch == '/')
-					readPtr--;
-				token.value +=ch;
-				while(true){
-					if(readPtr != size){
-						ch = codeString.at(readPtr++);
-						if(isoperator(ch)){
-							token.value +=ch;
-						}else{
-							readPtr--;
-							break;
-						}
-					}else{
-						break;
-					}
-				}
-				token.type = "OPERATOR";
-			}
+			token = tokenizeOperator(ch);
 		}else if(ch == '\''){
-			token.value += ch;
-			while(true){
-				ch = codeString.at(readPtr++);
-				if(ch == '\\'){
-					char ch1 = codeString.at(readPtr++);
-					if(ch1 =='t' or ch1 == 'n' or ch1=='\\' or ch1=='\''){
-						token.value += ch;
-						token.value += ch1;
-					}else{
-						throw "Problem with creating <STRING> token";
-					}
-				}else if(ch == '\''){
-					token.value +=ch;
-					token.type ="STRING";
-					//return token;
-					
-					break;
-				} else if(isalpha(ch) or isdigit(ch) or isoperator(ch) or ch==')' or ch=='(' or ch==';' or ch==','
-						or isspace(ch)){
-					token.value +=ch;
-				}
-			}
+			token = tokenizeString(ch);			
 		}else if(ch == '(' or ch == ')' or ch == ';' or ch == ','){
-			token.type = ch;
-			token.value = ch;
+			token = tokenizePunctuation(ch);
 		}
 		tokens.push_back(token);
 		//cout << token.type << "\t" << token.value << endl;
 	}
 
+}
+
+Token Lexer::tokenizeIdentifier(char ch){
+
+	Token t;
+	t.value +=ch;
+		while(true){
+			if(readPtr != size){
+				ch = codeString.at(readPtr++);
+				if(isalpha(ch) || isdigit(ch) || ch == '_'){
+					t.value +=ch;
+				}else{
+					readPtr--;
+					break;
+				}
+			}else{
+				break;
+			}
+		}
+		if(isKeyword(t.value)){
+			t.type = "KEYWORD";
+		}else{
+			t.type = "IDENTIFIER";
+		}
+	return t;
+}
+
+Token Lexer::tokenizeInteger(char ch){
+
+	Token t;
+	t.value +=ch;
+	while(true){
+		if(readPtr != size){
+			ch = codeString.at(readPtr++);
+			if(isdigit(ch)){
+				t.value +=ch;
+			}else{
+				readPtr--;
+				break;
+			}
+		}else{
+			break;
+		}
+	}
+	t.type = "INT";
+	return t;
+}
+
+Token Lexer::tokenizeString(char ch){
+	Token t;
+	t.value += ch;
+	while(true){
+		ch = codeString.at(readPtr++);
+		if(ch == '\\'){
+			char ch1 = codeString.at(readPtr++);
+			if(ch1 =='t' or ch1 == 'n' or ch1=='\\' or ch1=='\''){
+				t.value += ch;
+				t.value += ch1;
+			}else{
+				throw "Problem with creating <STRING> token";
+			}
+		}else if(ch == '\''){
+			t.value +=ch;
+			t.type ="STRING";
+			//return token;
+			
+			break;
+		} else if(isalpha(ch) or isdigit(ch) or isoperator(ch) or ch==')' or ch=='(' or ch==';' or ch==','
+				or isspace(ch)){
+			t.value +=ch;
+		}
+	}
+	return t;
+}
+
+
+Token Lexer::tokenizeOperator(char ch){
+	
+	Token t;
+
+	if(ch == '/' && codeString.at(readPtr++) == '/'){
+	while(true){
+		ch = codeString.at(readPtr++);
+		if(ch == '\n'){
+			readPtr--;
+			break;
+		}else if(isalpha(ch) || isdigit(ch) || isoperator(ch) || ch == ' ' || ch=='\t'
+				|| ch=='\'' || ch == '(' || ch==')' || ch==';' || ch==',' || ch=='\\'){
+			continue;
+		}
+	}
+	tokenizeStr();
+	}else{
+		if(ch == '/')
+			readPtr--;
+		t.value +=ch;
+		while(true){
+			if(readPtr != size){
+				ch = codeString.at(readPtr++);
+				if(isoperator(ch)){
+					t.value +=ch;
+				}else{
+					readPtr--;
+					break;
+				}
+			}else{
+				break;
+			}
+		}
+		t.type = "OPERATOR";
+	}
+	return t;
+}
+
+Token Lexer::tokenizePunctuation(char ch){
+	Token t;
+	t.type = ch;
+	t.value = ch;
+	return t;
 }
 
 Token Lexer::peekNextToken(){

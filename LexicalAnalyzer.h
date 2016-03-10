@@ -26,6 +26,11 @@ class Lexer {
 		Token peekNextToken();
 		vector<Token> tokens;
 		int currPtr;
+		Token tokenizeIdentifier(char ch);
+		Token tokenizeInteger(char ch);
+		Token tokenizeOperator(char ch);
+		Token tokenizeString(char ch);
+		Token tokenizePunctuation(char ch);
 };
 
 #endif /* LEXICALANALYZER_H_ */
