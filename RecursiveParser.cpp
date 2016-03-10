@@ -1,7 +1,6 @@
-// UFID        : 21817195
-// Author 	   : Saurabh Saxena
 #include <iostream>
 #include "RecursiveParser.h"
+#include <stack>
 #include "Token.h"
 
 using namespace std;
@@ -20,6 +19,13 @@ RecursiveParser::RecursiveParser(LexicalAnalyzer la){
 RecursiveParser::~RecursiveParser(){
 
 }
+
+void RecursiveParser::addRightChild(TreeNode* treeNode){
+	TreeNode* parentNode = trees.pop();
+	parentNode->right = treeNode;
+	trees.push(parentNode);
+}
+
 
 void RecursiveParser::read(Token token){
 
@@ -59,14 +65,14 @@ void RecursiveParser::buildTree(Token token, int numOfNodes){
 		int i;
 		for(i=0;i<numOfNodes-1;i++){
 			//cout<<"Count "+i<<endl;
-			TreeNode* curr = stack.pop();
-			stack.addRightChild(curr);
+			TreeNode* curr = trees.pop();
+			addRightChild(curr);
 		}
-		TreeNode* top = stack.pop();
+		TreeNode* top = trees.pop();
 		if(top != NULL)
 			newNode->left = top;
 	}
-	stack.push(newNode);
+	trees.push(newNode);
 }
 
 
@@ -454,7 +460,7 @@ void RecursiveParser::parseV1(){
 
 void RecursiveParser::printTree(){
 	//cout<<"Stack size: "<<stack.getSize()<<endl;
-	TreeNode* t = stack.pop();
+	TreeNode* t = trees.pop();
 	preOrder(t,std::string(""));
 }
 

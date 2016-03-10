@@ -1,7 +1,7 @@
 # Make file for PLPProj1
 
-p1 : LexicalAnalyzer.o PLPProj1.o RecursiveParser.o Stack.o Token.o TreeNode.o
-	g++ -o p1 LexicalAnalyzer.o PLPProj1.o RecursiveParser.o Stack.o Token.o TreeNode.o
+p1 : LexicalAnalyzer.o PLPProj1.o RecursiveParser.o Token.o TreeNode.o
+	g++ -o p1 LexicalAnalyzer.o PLPProj1.o RecursiveParser.o Token.o TreeNode.o
 	
 LexicalAnalyzer.o : LexicalAnalyzer.cpp LexicalAnalyzer.h Token.h
 	g++ -c LexicalAnalyzer.cpp
@@ -12,8 +12,8 @@ PLPProj1.o : PLPProj1.cpp LexicalAnalyzer.h RecursiveParser.h
 RecursiveParser.o : RecursiveParser.cpp RecursiveParser.h Token.h
 	g++ -c RecursiveParser.cpp
 
-Stack.o : Stack.cpp Stack.h
-	g++ -c Stack.cpp
+# Stack.o : Stack.cpp Stack.h
+# 	g++ -c Stack.cpp
 
 Token.o : Token.cpp Token.h
 	g++ -c Token.cpp

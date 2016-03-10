@@ -1,4 +1,3 @@
-
 #ifndef RECURSIVEPARSER_H_
 #define RECURSIVEPARSER_H_
 
@@ -6,7 +5,7 @@
 #include "Token.h"
 #include "TreeNode.h"
 #include "LexicalAnalyzer.h"
-#include "Stack.h"
+#include <stack>
 #include <cstdlib>
 
 using namespace std;
@@ -21,8 +20,9 @@ class RecursiveParser
 		static string OPT;
 		LexicalAnalyzer la;
 		bool moreTokens;
-		Stack stack;
+		stack<TreeNode *> trees;
 		Token nextToken;
+		void addRightChild(TreeNode* t);
 		void formattedPrint(Token t,std::string dots);
 		void preOrder(TreeNode* t, std::string dots);
 		void read(Token token);

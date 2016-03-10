@@ -24,9 +24,9 @@ string openFile(char* fileName){
 			file_content +=  next_line + "\n";
 		}
 	}
+	input_file.close();
 	return file_content;
 }
-
 
 int main(int argc,char *argv[]) {
 
