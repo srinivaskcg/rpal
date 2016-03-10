@@ -1,0 +1,6 @@
+This directory contains the executable for Steve Walstra's
+implementation of RPAL.
+
+The 'run_tests' shell script runs all the test programs in
+the 'tests' directory.  Edit the 'run_tests' file to choose
+among the various available options.

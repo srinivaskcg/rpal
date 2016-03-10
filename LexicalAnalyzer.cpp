@@ -14,20 +14,34 @@
 
 using namespace std;
 
-
 LexicalAnalyzer::LexicalAnalyzer(std::string codeString) {
 	this->codeString = codeString;
 	this->size = codeString.size();
 	this->readPtr = 0;
+	this->currPtr = 0;
 }
 
 LexicalAnalyzer::~LexicalAnalyzer() {
 
 }
 
-Token LexicalAnalyzer::getNextToken()
+Token LexicalAnalyzer::getNextToken(){
+
+	//cout << "Inside get next" << endl;
+	//cout << currPtr << endl;
+
+	Token t = tokens[currPtr++];
+	//cout << t.value << "\t" << t.type << endl;
+	return t;
+}
+
+void LexicalAnalyzer::tokenizeStr()
 {
-	Token token;
+
+	//cout << "Inside Tokenizer" << endl;
+	size = codeString.size();
+	//cout << size << endl;
+	readPtr = 0;
 	//If next character is a space, ignore
 	//If next character is a letter, go to case: identifier
 	//If next character is a digit, go to Integer
@@ -35,11 +49,17 @@ Token LexicalAnalyzer::getNextToken()
 	//If next character is a //, go to comment section
 	//Handle punctuation characters
 	//Handle String if next character start with ''
-	while(true){
-		//cout << "Intial ptr value "<< readPtr;
-		if(readPtr == size)
-			throw "No more tokens";
+	while(readPtr < size){
+		//cout << "Intial ptr value "<< readPtr << endl;
+		/*if(readPtr == size){
+			cout << "No more tokens";
+			break;
+		}*/
+
+		Token token;
+		
 		char ch = codeString.at(readPtr++);
+
 		if(isspace(ch) or ch == '\t' or ch == '\n'){
 			continue;
 		}else if(isalpha(ch)){
@@ -77,7 +97,7 @@ Token LexicalAnalyzer::getNextToken()
 					break;
 				}
 			}
-			token.type = "INTEGER";
+			token.type = "INT";
 		}else if (isoperator(ch)){
 			if(ch == '/' && codeString.at(readPtr++) == '/'){
 				while(true){
@@ -125,7 +145,9 @@ Token LexicalAnalyzer::getNextToken()
 				}else if(ch == '\''){
 					token.value +=ch;
 					token.type ="STRING";
-					return token;
+					//return token;
+					
+					break;
 				} else if(isalpha(ch) or isdigit(ch) or isoperator(ch) or ch==')' or ch=='(' or ch==';' or ch==','
 						or isspace(ch)){
 					token.value +=ch;
@@ -135,19 +157,22 @@ Token LexicalAnalyzer::getNextToken()
 			token.type = ch;
 			token.value = ch;
 		}
-		return token;
+		tokens.push_back(token);
+		//cout << token.type << "\t" << token.value << endl;
 	}
 
 }
 
 Token LexicalAnalyzer::peekNextToken(){
-	if(readPtr == size)
-		throw "No more tokens";
-	Token t = getNextToken();
-	int count = t.value.size();
+	//cout << "Inside peek" << "\t" << currPtr << "\t" << size << endl;
+
+	//if(currPtr == size)
+	//	throw "No more tokens";
+	Token t = tokens[currPtr];
+	/*int count = t.value.size();
 	while(count-- !=0){
 		readPtr--;
-	}
+	}*/
 	return t;
 }
 

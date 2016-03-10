@@ -12,8 +12,9 @@ string openFile(char* fileName){
 	string fileContent;
 	string nextLine;
 
-	cout << fileName;
 	ifstream inputFile;
+
+	//cout << fileName;
 
 	inputFile.open(fileName);
 	
@@ -23,9 +24,11 @@ string openFile(char* fileName){
 	if(inputFile.is_open()){
 		while(inputFile.good()){
 			getline(inputFile,nextLine);
-			fileContent +=  nextLine;
+			fileContent +=  nextLine + "\n";
 		}
 	}
+	//cout << fileContent << endl;
+
 	return fileContent;
 }
 
@@ -47,7 +50,7 @@ int main(int argc,char *argv[]) {
 	if(astFound == true){
 		
 		input = argv[2];
-		cout << input << endl;
+		//cout << input << endl;
 		string codeString = openFile(input);
 
 		if(codeString.size() == 0)
@@ -57,7 +60,7 @@ int main(int argc,char *argv[]) {
 		rp.parse();
 		rp.printTree();
 	}else{
-		//cout<< "Usage: p1 -ast fileLocation"<<endl;
+		cout<< "Usage: p1 -ast fileLocation"<<endl;
 	}
 	return 0;
 }
