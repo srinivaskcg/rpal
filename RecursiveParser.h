@@ -18,7 +18,7 @@ class Parser
 		static string INT;
 		static string KEY;
 		static string OPT;
-		LexicalAnalyzer la;
+		Lexer la;
 		bool moreTokens;
 		stack<TreeNode *> trees;
 		Token nextToken;
@@ -26,7 +26,7 @@ class Parser
 		void formattedPrint(Token t,std::string dots);
 		void preOrder(TreeNode* t, std::string dots);
 		void read(Token token);
-		void buildTree(Token token, int numOfNodes);
+		void treeBuilder(Token token, int numOfNodes);
 		void E();
 		void Ew();
 		void T();
@@ -51,13 +51,10 @@ class Parser
 		void BpHelper(Token nextToken, string tokenValue);
 		void RHelper(Token t, string value);
 	public:
-		Parser(LexicalAnalyzer la);
+		Parser(Lexer la);
 		~Parser();
 		void printTree();
 		void parse();
 };
 
-
-
-
-#endif /*End of Recursive Parser*/
+#endif /*End of Parser*/

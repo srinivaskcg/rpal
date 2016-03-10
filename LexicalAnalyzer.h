@@ -8,7 +8,7 @@ using namespace std;
 #ifndef LEXICALANALYZER_H_
 #define LEXICALANALYZER_H_
 
-class LexicalAnalyzer {
+class Lexer {
 	private:
 		string codeString;
 		int size;
@@ -17,10 +17,10 @@ class LexicalAnalyzer {
 		bool isKeyword(string tokenValue);
 
 	public:
-		LexicalAnalyzer(string codeString);
-		LexicalAnalyzer();
-		void operator=(const LexicalAnalyzer& laObj);
-		virtual ~LexicalAnalyzer();
+		Lexer(string codeString);
+		Lexer();
+		void operator=(const Lexer& laObj);
+		virtual ~Lexer();
 		Token getNextToken();
 		void tokenizeStr();
 		Token peekNextToken();

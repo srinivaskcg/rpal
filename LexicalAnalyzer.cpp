@@ -7,18 +7,18 @@
 
 using namespace std;
 
-LexicalAnalyzer::LexicalAnalyzer(std::string codeString) {
+Lexer::Lexer(std::string codeString) {
 	this->codeString = codeString;
 	this->size = codeString.size();
 	this->readPtr = 0;
 	this->currPtr = 0;
 }
 
-LexicalAnalyzer::~LexicalAnalyzer() {
+Lexer::~Lexer() {
 
 }
 
-Token LexicalAnalyzer::getNextToken(){
+Token Lexer::getNextToken(){
 
 	//cout << "Inside get next" << endl;
 	//cout << currPtr << endl;
@@ -28,7 +28,7 @@ Token LexicalAnalyzer::getNextToken(){
 	return t;
 }
 
-void LexicalAnalyzer::tokenizeStr()
+void Lexer::tokenizeStr()
 {
 
 	//cout << "Inside Tokenizer" << endl;
@@ -156,7 +156,7 @@ void LexicalAnalyzer::tokenizeStr()
 
 }
 
-Token LexicalAnalyzer::peekNextToken(){
+Token Lexer::peekNextToken(){
 	//cout << "Inside peek" << "\t" << currPtr << "\t" << size << endl;
 
 	//if(currPtr == size)
@@ -170,7 +170,7 @@ Token LexicalAnalyzer::peekNextToken(){
 }
 
 
-bool LexicalAnalyzer::isoperator(char ch){
+bool Lexer::isoperator(char ch){
 
 	char char_set[] = {'+','-','*','<','>','&','.','@','/',':','=','-','|','$','!','#','%','^','_','[',']','{','}','"','`','?'};
 	
@@ -183,7 +183,7 @@ bool LexicalAnalyzer::isoperator(char ch){
 	return false;
 }
 
-bool LexicalAnalyzer::isKeyword(string tokenValue){
+bool Lexer::isKeyword(string tokenValue){
 	
 	string keyword_set[] = {"let","in","fn","where","aug","or","not","gr","ge","ls","le","eq","ne","true","false","nil","dummy",
 							"within","and","rec","list"};
@@ -197,12 +197,12 @@ bool LexicalAnalyzer::isKeyword(string tokenValue){
 	return false;
 }
 
-void LexicalAnalyzer::operator=(const LexicalAnalyzer& laObj){
+void Lexer::operator=(const Lexer& laObj){
 	this->codeString = laObj.codeString;
 	this->size = laObj.size;
 	this->readPtr = laObj.readPtr;
 }
 
-LexicalAnalyzer::LexicalAnalyzer(){
+Lexer::Lexer(){
 
 }

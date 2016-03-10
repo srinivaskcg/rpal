@@ -60,7 +60,7 @@ int main(int argc,char *argv[]) {
 			cout << code_string << endl;
 		}
 
-		LexicalAnalyzer la(code_string);
+		Lexer la(code_string);
 		Parser rp(la);
 		rp.parse();
 		rp.printTree();
