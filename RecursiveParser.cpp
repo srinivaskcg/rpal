@@ -94,7 +94,7 @@ void Parser::E(){
 		do{
 			Vb();
 			n++;
-		}while(nextToken.type == ID or nextToken.type == "(");
+		}while(nextToken.type == ID || nextToken.type == "(");
 		Token dotToken(".",OPT);
 		read(dotToken);
 		E();

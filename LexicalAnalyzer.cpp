@@ -53,7 +53,7 @@ void Lexer::tokenizeStr()
 		
 		char ch = codeString.at(readPtr++);
 
-		if(isspace(ch) or ch == '\t' or ch == '\n'){
+		if(isspace(ch) || ch == '\t' || ch == '\n'){
 			continue;
 		}else if(isalpha(ch)){
 			token = tokenizeIdentifier(ch);
@@ -63,7 +63,7 @@ void Lexer::tokenizeStr()
 			token = tokenizeOperator(ch);
 		}else if(ch == '\''){
 			token = tokenizeString(ch);			
-		}else if(ch == '(' or ch == ')' or ch == ';' or ch == ','){
+		}else if(ch == '(' || ch == ')' || ch == ';' || ch == ','){
 			token = tokenizePunctuation(ch);
 		}
 		tokens.push_back(token);
@@ -89,10 +89,10 @@ Token Lexer::tokenizeIdentifier(char ch){
 				break;
 			}
 		}
-		if(isKeyword(t.value)){
-			t.type = "KEYWORD";
-		}else{
+		if(!isKeyword(t.value)){
 			t.type = "IDENTIFIER";
+		}else{
+			t.type = "KEYWORD";
 		}
 	return t;
 }
@@ -119,13 +119,14 @@ Token Lexer::tokenizeInteger(char ch){
 }
 
 Token Lexer::tokenizeString(char ch){
+	
 	Token t;
 	t.value += ch;
 	while(true){
 		ch = codeString.at(readPtr++);
 		if(ch == '\\'){
 			char ch1 = codeString.at(readPtr++);
-			if(ch1 =='t' or ch1 == 'n' or ch1=='\\' or ch1=='\''){
+			if(ch1 =='t' || ch1 == 'n' || ch1=='\\' || ch1=='\''){
 				t.value += ch;
 				t.value += ch1;
 			}else{
@@ -133,12 +134,10 @@ Token Lexer::tokenizeString(char ch){
 			}
 		}else if(ch == '\''){
 			t.value +=ch;
-			t.type ="STRING";
-			//return token;
-			
+			t.type ="STRING";			
 			break;
-		} else if(isalpha(ch) or isdigit(ch) or isoperator(ch) or ch==')' or ch=='(' or ch==';' or ch==','
-				or isspace(ch)){
+		} else if(isalpha(ch) || isdigit(ch) || isoperator(ch) || ch==')' || ch=='(' || ch==';' || ch==','
+				|| isspace(ch)){
 			t.value +=ch;
 		}
 	}
