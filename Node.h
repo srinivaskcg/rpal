@@ -10,8 +10,7 @@ public:
 	Token value;
 	Node* right;
 	Node* left;
-	Node* next;
 };
 
-#endif /* NODE_H_ */
+#endif // NODE_H_
 

@@ -2,8 +2,7 @@
 #include <fstream>
 #include <stdio.h>
 #include <string.h>
-#include "Lexer.h"
-#include "Parser.h"
+#include "LexParser.h"
 
 using namespace std;
 
@@ -51,18 +50,18 @@ int main(int argc,char *argv[]) {
 		file_name = argv[2];
 	}
 
+	string code_string = openFile(file_name);
+
+	if(code_string.size() == 0)
+		return 0;
+	
+	if(l_switch){
+		cout << code_string << endl;
+	}
+	
 	if(ast_switch){
-		string code_string = openFile(file_name);
-		if(code_string.size() == 0)
-			return 0;
-
-		if(l_switch){
-			cout << code_string << endl;
-		}
-
-		Lexer la(code_string);
-		Parser parser(la);
-		parser.parse();
+		LexParser lex(code_string);
+		lex.parse();
 	}else{
 		cout << "How to run: p1 -ast location" << endl;
 	}
