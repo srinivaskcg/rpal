@@ -25,8 +25,8 @@ class Parser
 		void addRightChild(TreeNode* t);
 		void formattedPrint(Token t,std::string dots);
 		void preOrder(TreeNode* t, std::string dots);
-		void read(Token token);
-		void treeBuilder(Token token, int numOfNodes);
+		void readToken(Token token);
+		void treeBuilder(Token token, int popNodesCnt);
 		void E();
 		void Ew();
 		void T();
@@ -48,8 +48,6 @@ class Parser
 		void Db();
 		void Vb();
 		void Vl();
-		void BpHelper(Token nextToken, string tokenValue);
-		void RHelper(Token t, string value);
 	public:
 		Parser(Lexer la);
 		~Parser();

@@ -27,7 +27,7 @@ void Parser::addRightChild(TreeNode* treeNode){
 	trees.push(parentNode);
 }
 
-void Parser::read(Token token){
+void Parser::readToken(Token token){
 
 	//cout << "Inside read" << "\t" <<token.type << "\t" << token.value << "\t" << nextToken.value<< endl;
 	if(moreTokens == false)
@@ -36,7 +36,7 @@ void Parser::read(Token token){
 		//cout << "Expected "<<token.value << " but found" <<nextToken.value;
 		exit(1);
 	}
-	if(token.type == ID or token.type == STR or token.type == INT){
+	if(token.type == ID || token.type == STR || token.type == INT){
 		treeBuilder(token, 0);
 	}
 	try{
@@ -53,25 +53,25 @@ void Parser::read(Token token){
 }
 
 
-void Parser::treeBuilder(Token token, int numOfNodes){
+void Parser::treeBuilder(Token token, int popTreeCnt){
 	//cout<< "Inside treeBuilder "<< token.value<<endl;
 	//cout<< "Stack size:"<<stack.getSize()<<endl;
-	TreeNode* newNode = new TreeNode;
-	newNode->value = token;
-	if(numOfNodes != 0){
-		int i;
-		for(i=0;i<numOfNodes-1;i++){
-			//cout<<"Count "+i<<endl;
+	TreeNode* tempNode = new TreeNode;
+	tempNode->value = token;
+	if(popTreeCnt != 0){
+		while(!trees.empty() && popTreeCnt > 1){
 			TreeNode* curr = trees.top();
 			trees.pop();
 			addRightChild(curr);
+			popTreeCnt--;
 		}
 		TreeNode* top = trees.top();
 		trees.pop();
 		if(top != NULL)
-			newNode->left = top;
+			tempNode->left = top;
 	}
-	trees.push(newNode);
+	trees.push(tempNode);
+	return;
 }
 
 
@@ -80,23 +80,23 @@ void Parser::E(){
 	if(nextToken.value == "let"){
 		Token letToken("let",KEY);
 		//cout << "In E" << endl;
-		read(letToken);
+		readToken(letToken);
 		D();
 		Token inToken("in",KEY);
-		read(inToken);
+		readToken(inToken);
 		E();
 		Token nodeToken("let","let");
 		treeBuilder(nodeToken,2);
 	} else if(nextToken.value == "fn"){
 		Token fnToken("fn","fn");
-		read(fnToken);
+		readToken(fnToken);
 		int n=0;
 		do{
 			Vb();
 			n++;
 		}while(nextToken.type == ID || nextToken.type == "(");
 		Token dotToken(".",OPT);
-		read(dotToken);
+		readToken(dotToken);
 		E();
 		Token nodeToken("lambda","lambda");
 		treeBuilder(nodeToken,n+1);
@@ -111,7 +111,7 @@ void Parser::Ew(){
 	T();
 	if(nextToken.value == "where"){
 		Token t("where",KEY);
-		read(t);
+		readToken(t);
 		Dr();
 		Token nodeToken("where","where");
 		treeBuilder(nodeToken,2);
@@ -125,7 +125,7 @@ void Parser::T(){
 	if(nextToken.value == ","){
 		int n = 0;
 		do{
-			read(nextToken);
+			readToken(nextToken);
 			Ta();
 			n++;
 		}while(nextToken.value == ",");
@@ -140,7 +140,7 @@ void Parser::Ta(){
 	Tc();
 	while(nextToken.value == "aug"){
 		Token temp = nextToken;
-		read(nextToken);
+		readToken(nextToken);
 		Tc();
 		treeBuilder(temp,2);
 	}
@@ -151,10 +151,10 @@ void Parser::Tc(){
 	//cout<<"Inside parseTc()"<<endl;
 	B();
 	if(nextToken.value == "->"){
-		read(nextToken);
+		readToken(nextToken);
 		Tc();
 		Token elseToken("|",OPT);
-		read(elseToken);
+		readToken(elseToken);
 		Tc();
 		Token nodeToken("->","->");
 		treeBuilder(nodeToken,3);
@@ -167,7 +167,7 @@ void Parser::B(){
 	Bt();
 	while(nextToken.value == "or"){
 		Token temp = nextToken;
-		read(nextToken);
+		readToken(nextToken);
 		Bt();
 		treeBuilder(temp,2);
 	}
@@ -179,7 +179,7 @@ void Parser::Bt(){
 	Bs();
 	while(nextToken.value == "&"){
 		Token temp = nextToken;
-		read(nextToken);
+		readToken(nextToken);
 		Bs();
 		treeBuilder(temp,2);
 	}
@@ -190,7 +190,7 @@ void Parser::Bs(){
 	//cout<<"Inside parseBs()"<<endl;
 	if(nextToken.value == "not"){
 		Token temp = nextToken;
-		read(nextToken);
+		readToken(nextToken);
 		Bp();
 		treeBuilder(temp,1);
 	}else{
@@ -203,48 +203,57 @@ void Parser::Bp(){
 	//cout<<"Inside parseBp()"<<endl;
 	A();
 	if(nextToken.value=="gr" or nextToken.value == ">"){
-		BpHelper(nextToken, "gr");
+		readToken(nextToken);
+		A();
+		Token t("gr", "gr");
+		treeBuilder(t,2);
 	}else if(nextToken.value == "ls" or nextToken.value == "<"){
-		BpHelper(nextToken,"ls");
+		readToken(nextToken);
+		A();
+		Token t("ls", "ls");
+		treeBuilder(t,2);
 	}else if(nextToken.value =="ge" or nextToken.value == ">=" ){
-		BpHelper(nextToken, "ge");
+		readToken(nextToken);
+		A();
+		Token t("ge", "ge");
+		treeBuilder(t,2);
 	}else if(nextToken.value =="le" or nextToken.value == "<=" ){
-		BpHelper(nextToken, "le");
+		readToken(nextToken);
+		A();
+		Token t("le", "le");
+		treeBuilder(t,2);
 	}else if(nextToken.value =="eq" ){
-		BpHelper(nextToken, "eq");
+		readToken(nextToken);
+		A();
+		Token t("eq", "eq");
+		treeBuilder(t,2);
 	}else if(nextToken.value =="ne"){
-		BpHelper(nextToken, "ne");
+		readToken(nextToken);
+		A();
+		Token t("ne", "ne");
+		treeBuilder(t,2);
 	}
 	//cout<<"End of parseBp()"<<endl;
-}
-
-void Parser::BpHelper(Token nextToken, string tokenValue){
-	//cout<<"Inside parseBpHelper()"<<endl;
-	read(nextToken);
-	A();
-	Token t(tokenValue, tokenValue);
-	treeBuilder(t,2);
-	//cout<<"End of parseBpHelper()"<<endl;
 }
 
 void Parser::A(){
 	//cout<<"Inside parseA()"<<endl;
 	if(nextToken.value == "-"){
 		Token negToken("-",OPT);
-		read(negToken);
+		readToken(negToken);
 		At();
 		Token nodeToken("neg","neg");
 		treeBuilder(nodeToken,1);
 	}else if(nextToken.value == "+"){
 		Token posToken("+",OPT);
-		read(posToken);
+		readToken(posToken);
 		At();
 	}else{
 		At();
 	}
 	while(nextToken.value == "+" or nextToken.value == "-"){
 		Token temp = nextToken;
-		read(nextToken);
+		readToken(nextToken);
 		At();
 		treeBuilder(temp,2);
 	}
@@ -257,7 +266,7 @@ void Parser::At(){
 	//cout << nextToken.value << endl;
 	while(nextToken.value == "*" or nextToken.value=="/"){
 		Token temp = nextToken;
-		read(nextToken);
+		readToken(nextToken);
 		Af();
 		treeBuilder(temp,2);
 	}
@@ -269,7 +278,7 @@ void Parser::Af(){
 	Ap();
 	while(nextToken.value == "**"){
 		Token temp = nextToken;
-		read(nextToken);
+		readToken(nextToken);
 		Af();
 		treeBuilder(temp,2);
 	}
@@ -281,10 +290,10 @@ void Parser::Ap(){
 	R();
 	while(nextToken.value == "@"){
 		Token temp = nextToken;
-		read(nextToken); //Read '@'
+		readToken(nextToken); 
 		if(nextToken.type != ID)
 			throw "Expected Identifier found in parseAp()";
-		read(nextToken); //Read identifier
+		readToken(nextToken); 
 		R();
 		treeBuilder(temp,3);
 	}
@@ -294,9 +303,9 @@ void Parser::Ap(){
 void Parser::R(){
 	//cout<<"Inside parseR()"<<endl;
 	Rn();
-	while(nextToken.type == ID or nextToken.type == STR or nextToken.type == INT or
-			nextToken.value == "true" or nextToken.value == "false" or nextToken.value == "nil" or
-			nextToken.value == "(" or nextToken.value == "dummy"){
+	while(nextToken.type == ID || nextToken.type == STR || nextToken.type == INT ||
+			nextToken.value == "true" || nextToken.value == "false" || nextToken.value == "nil" ||
+			nextToken.value == "(" || nextToken.value == "dummy"){
 		Rn();
 		Token nodeToken("gamma","gamma");
 		treeBuilder(nodeToken,2);
@@ -311,39 +320,37 @@ void Parser::Rn(){
 	//cout << nextToken.value << endl;
 	//cout << nextToken.type << endl;
 	if(nextToken.type == ID or nextToken.type == STR or nextToken.type == INT ){
-		//cout << "In" << endl;
-			read(nextToken);
-			//cout << "return" << endl;
+		readToken(nextToken);
 	}else if(nextToken.value=="true"){
-		RHelper(nextToken, "true");
+		readToken(nextToken);
+		Token nodeToken("true","true");
+		treeBuilder(nodeToken,0);
 	}else if(nextToken.value == "false"){
-		RHelper(nextToken, "false");
+		readToken(nextToken);
+		Token nodeToken("false","false");
+		treeBuilder(nodeToken,0);
 	}else if(nextToken.value == "nil"){
-		RHelper(nextToken, "nil");
+		readToken(nextToken);
+		Token nodeToken("nil","nil");
+		treeBuilder(nodeToken,0);
 	}else if(nextToken.value == "dummy"){
-		RHelper(nextToken,"dummy");
+		readToken(nextToken);
+		Token nodeToken("dummy","dummy");
+		treeBuilder(nodeToken,0);
 	}else if(nextToken.value == "("){
-		read(nextToken);
+		readToken(nextToken);
 		E();
 		Token t(")",")");
-		read(t);
+		readToken(t);
 	}
 	//cout<<"End of parseRn()"<<endl;
-}
-
-void Parser::RHelper(Token t, string value){
-	//cout<<"Inside parseRHelper()"<<endl;
-	read(t);
-	Token nodeToken(value,value);
-	treeBuilder(nodeToken,0);
-	//cout<<"End of parseRHelper()"<<endl;
 }
 
 void Parser::D(){
 	//cout<<"Inside parseD()"<<endl;
 	Da();
 	if(nextToken.value == "within"){
-		read(nextToken);
+		readToken(nextToken);
 		D();
 		Token nodeToken("within", "within");
 		treeBuilder(nodeToken,2);
@@ -358,7 +365,7 @@ void Parser::Da(){
 		int n = 1;
 		Token temp = nextToken;
 		while(nextToken.value == "and"){
-			read(nextToken);
+			readToken(nextToken);
 			Dr();
 			n++;
 		}
@@ -371,7 +378,7 @@ void Parser::Dr(){
 	//cout<<"Inside parseDr()"<<endl;
 	if(nextToken.value == "rec"){
 		Token temp = nextToken;
-		read(nextToken);
+		readToken(nextToken);
 		Db();
 		treeBuilder(temp,1);
 	}else{
@@ -386,16 +393,16 @@ void Parser::Db(){
 	//Check if the next token is V1
 	if(nextToken.value == "("){
 		//cout << "Inside if";
-		read(nextToken);
+		readToken(nextToken);
 		D();
 		Token t(")",OPT);
-		read(t);
+		readToken(t);
 	} else if(nextToken.type == ID && (la.peekNextToken().value == "," || la.peekNextToken().value == "=")){
 		// if next token is '=' or ',' then rule is Vl '=' E
 		//cout << "else if";
 		Vl();
 		Token t("=",OPT);
-		read(t);
+		readToken(t);
 		E();
 		//cout<< "Return from E" << endl;
 		Token nodeToken("=","=");
@@ -403,7 +410,7 @@ void Parser::Db(){
 		//cout<<"Tree build "<<endl;
 	} else{// else rule is '<ID>' Vb+ '=' E
 		//cout << "Else";
-		read(nextToken);
+		readToken(nextToken);
 		int n = 1;
 		Vb();
 		while(nextToken.type == ID or nextToken.value== "("){
@@ -411,7 +418,7 @@ void Parser::Db(){
 			Vb();
 		}
 		Token t("=",OPT);
-		read(t);
+		readToken(t);
 		E();
 		Token nodeToken("function_form", "function_form");
 		treeBuilder(nodeToken, n+2);
@@ -422,17 +429,17 @@ void Parser::Db(){
 void Parser::Vb(){
 	//cout<<"Inside parseVb()"<<endl;
 	if(nextToken.type == ID){
-		read(nextToken);
+		readToken(nextToken);
 	}else if(nextToken.value == "("){
-		read(nextToken);
+		readToken(nextToken);
 		if(nextToken.value == ")"){
-			read(nextToken);
+			readToken(nextToken);
 			Token nodeToken("()","()");
 			treeBuilder(nodeToken,0);
 		}else{
 			Vl();
 			Token t(")",")");
-			read(t);
+			readToken(t);
 		}
 	}
 	//cout<<"End of parseVb()"<<endl;
@@ -440,13 +447,13 @@ void Parser::Vb(){
 
 void Parser::Vl(){
 	//cout<<"Inside parseV1()"<<endl;
-	read(nextToken);
+	readToken(nextToken);
 	int n =1;
 	if(nextToken.value == ","){
 		while(nextToken.value == ","){
 			n++;
-			read(nextToken); //Reading ,
-			read(nextToken); //Reading ID
+			readToken(nextToken); 
+			readToken(nextToken); 
 		}
 		Token nodeToken(",",",");
 		treeBuilder(nodeToken,n);
