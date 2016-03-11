@@ -2,6 +2,7 @@
 #include "LexParser.h"
 #include "Token.h"
 #include <string>
+#include <cstring>
 #include <set>
 #include <cstdlib>
 using namespace std;
@@ -102,7 +103,7 @@ Token LexParser::tokenizeString(char ch){
 		ch = inputString.at(presentVal++);
 		if(ch == '\\'){
 			char nextCh = inputString.at(presentVal++);
-			if(nextCh =='t' || nextCh == 'n' || nextCh=='\\' || nextCh=='\''){
+			if(aComment(nextCh)){
 				t.value += ch;
 				t.value += nextCh;
 			}else{
@@ -112,14 +113,24 @@ Token LexParser::tokenizeString(char ch){
 			t.value += ch;
 			t.type = "STRING";			
 			break;
-		}else if(isalpha(ch) || isdigit(ch) || anOperator(ch) || ch==')' || ch=='(' || ch==';' || ch==','
-				|| ch == ' '){
+		}else if(aPunctuation(ch)){
 			t.value += ch;
 		}
 	}
 	return t;
 }
 
+bool LexParser::aComment(char ch){
+	if(ch=='\\' || ch=='\'' || ch =='t' || ch == 'n')
+		return true;
+	return false;
+}
+
+bool LexParser::aPunctuation(char ch){
+	if(ch=='(' || ch==')' || ch==';' || ch==',' || ch == ' ' || isalpha(ch) || isdigit(ch) || anOperator(ch))
+		return true;
+	return false;
+}
 
 Token LexParser::tokenizeOperator(char ch){
 	
@@ -131,8 +142,7 @@ Token LexParser::tokenizeOperator(char ch){
 			if(ch == '\n'){
 				presentVal--;
 				break;
-			}else if(isalpha(ch) || isdigit(ch) || anOperator(ch) || ch == ' ' || ch=='\t'
-					|| ch=='\'' || ch == '(' || ch==')' || ch==';' || ch==',' || ch=='\\'){
+			}else if(anOperator(ch) || aPunctuation(ch) || aComment(ch)){
 				continue;
 			}
 		}
@@ -167,7 +177,13 @@ Token LexParser::tokenizePunctuation(char ch){
 }
 
 Token LexParser::getNextToken(){
-	Token t = tokens[currPtr++];
+	Token t;
+	//cout << currPtr << "-" << tokens.size() << endl;
+	if(currPtr < tokens.size())
+		t = tokens[currPtr++];
+	else
+		Token t("End", "End");
+	//cout << t.value << endl;
 	return t;
 }
 
@@ -184,7 +200,7 @@ bool LexParser::aKeyword(string st) {
   return keyword_set.find(st) != keyword_set.end();
 }
 
-void LexParser::addRightChild(Node* node){
+void LexParser::makeRightNode(Node* node){
 	Node* parentNode = trees.top();
 	trees.pop();
 	parentNode->right = node;
@@ -208,15 +224,10 @@ void LexParser::readToken(Token token){
 	else if(token.type == "INT"){
 		treeBuilder("<INT:" + token.value + ">", 0);	
 	}
-	try{
-		if(currPtr == tokens.size())
-			throw "No more tokens";
-		nextToken = getNextToken();
-	}catch(const char* message){
-		moreTokens = false;
-		Token endToken("$$","$$");
-		nextToken = endToken;
-	}
+	nextToken = getNextToken();
+	
+	if(nextToken.value == "END")
+		throw "All tokens parsed";
 }
 
 void LexParser::treeBuilder(string tokenVal, int popTreeCnt){
@@ -228,7 +239,7 @@ void LexParser::treeBuilder(string tokenVal, int popTreeCnt){
 		while(!trees.empty() && popTreeCnt > 1){
 			Node* curr = trees.top();
 			trees.pop();
-			addRightChild(curr);
+			makeRightNode(curr);
 			popTreeCnt--;
 		}
 		Node* top = trees.top();

@@ -36,7 +36,9 @@ class LexParser {
 
 		bool anOperator(char ch);
 		bool aKeyword(string tokenValue);
-		void addRightChild(Node* t);
+		bool aComment(char ch);
+		bool aPunctuation(char ch);
+		void makeRightNode(Node* t);
 		void formattedPrint(Token t,std::string dots);
 		void preOrdTraversal(Node* t, std::string dots);
 		void readToken(Token token);
