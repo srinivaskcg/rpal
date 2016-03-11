@@ -20,12 +20,12 @@ Token Lexer::getNextToken(){
 
 void Lexer::tokenizeStr()
 {
-	size = inputString.size();
 	while(presentVal < size){
 
 		Token token;
 		
 		char ch = inputString.at(presentVal++);
+		//cout << ch << endl;
 
 		if(isspace(ch) || ch == '\t' || ch == '\n'){
 			continue;
@@ -62,7 +62,7 @@ Token Lexer::tokenizeIdentifier(char ch){
 				break;
 			}
 		}
-		if(!isKeyword(t.value)){
+		if(!aKeyword(t.value)){
 			t.type = "IDENTIFIER";
 		}else{
 			t.type = "KEYWORD";
@@ -110,7 +110,7 @@ Token Lexer::tokenizeString(char ch){
 			t.type = "STRING";			
 			break;
 		}else if(isalpha(ch) || isdigit(ch) || anOperator(ch) || ch==')' || ch=='(' || ch==';' || ch==','
-				|| isspace(ch)){
+				|| ch == ' '){
 			t.value += ch;
 		}
 	}
@@ -168,32 +168,12 @@ Token Lexer::peekNextToken(){
 	return t;
 }
 
-bool Lexer::anOperator(char ch){
-
-	char char_set[] = {'+','-','*','<','>','&','.','@','/',':','=','-','|','$','!','#','%','^','_','[',']','{','}','"','`','?'};
-	
-	/*for (char element : operator_set) {
-		if (element == ch){
-			return true;
-		}
-	}
-	return false;*/
-
-	set<char> ops;   
-	ops.insert(char_set, char_set+26);
-	if(ops.count(ch) > 0)
-		return true;
-	return false;
+bool Lexer::anOperator(char ch) {
+  return operator_set.find(ch) != operator_set.end();
 }
 
-bool Lexer::isKeyword(string tokenValue){
-	string keyword_set[] = {"let","in","fn","where","aug","or","not","gr","ge","ls","le","eq","ne","true","false","nil","dummy",
-							"within","and","rec","list"};
-	set<string> keys;   
-	keys.insert(keyword_set, keyword_set+21);
-	if(keys.count(tokenValue) > 0)
-		return true;
-	return false;
+bool Lexer::aKeyword(string st) {
+  return keyword_set.find(st) != keyword_set.end();
 }
 
 void Lexer::operator=(const Lexer& laObj){

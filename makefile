@@ -2,19 +2,19 @@ p1 : RpalProject1.o Lexer.o Parser.o Node.o Token.o
 	g++ -o p1 RpalProject1.o Lexer.o Parser.o Node.o Token.o
 
 RpalProject1.o : RpalProject1.cpp Lexer.h Parser.h
-	g++ -c RpalProject1.cpp
+	g++ -std=c++11 -c RpalProject1.cpp
 	
 Lexer.o : Lexer.cpp Lexer.h Token.h
-	g++ -c Lexer.cpp
+	g++ -std=c++11 -c Lexer.cpp
 
 Parser.o : Parser.cpp Parser.h Token.h
-	g++ -c Parser.cpp
+	g++ -std=c++11 -c Parser.cpp
 
 Node.o : Node.cpp Node.h
-	g++ -c Node.cpp
+	g++ -std=c++11 -c Node.cpp
 
 Token.o : Token.cpp Token.h
-	g++ -c Token.cpp
+	g++ -std=c++11 -c Token.cpp
 
 run :
 	./p1

@@ -1,6 +1,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_set>
 #include "Token.h"
 
 using namespace std;
@@ -9,12 +10,23 @@ using namespace std;
 #define LEXER_H_
 
 class Lexer {
+
+	unordered_set<char> operator_set {
+								    '+', '-', '*', '<', '>', '&', '.', '@', '/', ':', '=', '~', '|', '$',
+								    '!', '#', '%', '^', '_', '[', ']', '{', '}', '"', '`', '?'
+								  };
+
+	unordered_set<string> keyword_set {
+									"let","in","fn","where","aug","or","not","gr","ge","ls","le","eq","ne",
+									"true","false","nil","dummy","within","and","rec","list"
+								  };
+
 	private:
 		string inputString;
 		int size;
 		int presentVal;
 		bool anOperator(char ch);
-		bool isKeyword(string tokenValue);
+		bool aKeyword(string tokenValue);
 
 	public:
 		Lexer(string inputString);

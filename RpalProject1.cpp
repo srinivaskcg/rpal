@@ -61,8 +61,8 @@ int main(int argc,char *argv[]) {
 		}
 
 		Lexer la(code_string);
-		Parser rp(la);
-		rp.parse();
+		Parser parser(la);
+		parser.parse();
 	}else{
 		cout << "How to run: p1 -ast location" << endl;
 	}
