@@ -20,10 +20,10 @@ Parser::~Parser(){
 
 }
 
-void Parser::addRightChild(TreeNode* treeNode){
-	TreeNode* parentNode = trees.top();
+void Parser::addRightChild(Node* node){
+	Node* parentNode = trees.top();
 	trees.pop();
-	parentNode->right = treeNode;
+	parentNode->right = node;
 	trees.push(parentNode);
 }
 
@@ -62,18 +62,18 @@ void Parser::readToken(Token token){
 void Parser::treeBuilder(string tokenVal, int popTreeCnt){
 	//cout<< "Inside treeBuilder "<< token.value<<endl;
 	//cout<< "Stack size:"<<stack.getSize()<<endl;
-	TreeNode* tempNode = new TreeNode;
+	Node* tempNode = new Node;
 	Token tempToken(tokenVal,tokenVal);
 
 	tempNode->value = tempToken;
 	if(popTreeCnt != 0){
 		while(!trees.empty() && popTreeCnt > 1){
-			TreeNode* curr = trees.top();
+			Node* curr = trees.top();
 			trees.pop();
 			addRightChild(curr);
 			popTreeCnt--;
 		}
-		TreeNode* top = trees.top();
+		Node* top = trees.top();
 		trees.pop();
 		if(top != NULL)
 			tempNode->left = top;
@@ -450,22 +450,23 @@ void Parser::Vl(){
 
 void Parser::printTree(){
 	//cout<<"Stack size: "<<stack.getSize()<<endl;
-	TreeNode* t = trees.top();
-	trees.pop();
-	preOrder(t,std::string(""));
+	while(!trees.empty()){
+		Node* t = trees.top();
+		trees.pop();
+		preOrder(t,string(""));	
+	}
 }
 
 
-void Parser::preOrder(TreeNode* t, std::string dots){
+void Parser::preOrder(Node* t, string dots){
 	formattedPrint(t->value,dots);
-	string dots1 = "." + dots;
 	if(t->left != NULL)
-		preOrder(t->left,dots1);
+		preOrder(t->left, "." + dots);
 	if(t->right != NULL)
 		preOrder(t->right,dots);
 }
 
-void Parser::formattedPrint(Token t,std::string dots){
+void Parser::formattedPrint(Token t,string dots){
 	/*if(t.type == ID){
 		cout <<dots<<"<ID:"<< t.value<<'>'<<endl;
 	}else if(t.type == INT){
@@ -473,10 +474,15 @@ void Parser::formattedPrint(Token t,std::string dots){
 	}else if(t.type == STR){
 		cout << dots<<"<STR:"<<t.value<<'>'<<endl;
 	}else */
-	if(t.value == "true" or t.value == "false" or t.value == "nil" or t.value== "dummy"){
+	/*if(t.value == "true" || t.value == "false" || t.value == "nil" || t.value== "dummy"){
 		cout << dots<<'<'<<t.value<<'>'<<endl;
 	}else{
 		cout <<dots<<t.value<<endl;
+	}*/
+	if(t.value != "true" && t.value != "false" && t.value != "nil" && t.value != "dummy"){
+		cout <<dots<<t.value<<endl;
+	}else{
+		cout << dots<<'<'<<t.value<<'>'<<endl;
 	}
 }
 

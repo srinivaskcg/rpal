@@ -20,11 +20,11 @@ class Parser
 		static string OPT;
 		Lexer la;
 		bool moreTokens;
-		stack<TreeNode *> trees;
+		stack<Node *> trees;
 		Token nextToken;
-		void addRightChild(TreeNode* t);
+		void addRightChild(Node* t);
 		void formattedPrint(Token t,std::string dots);
-		void preOrder(TreeNode* t, std::string dots);
+		void preOrder(Node* t, std::string dots);
 		void readToken(Token token);
 		void treeBuilder(string tokenVal, int popNodesCnt);
 		void E();

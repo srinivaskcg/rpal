@@ -1,17 +1,17 @@
-#ifndef TREENODE_H_
-#define TREENODE_H_
+#ifndef NODE_H_
+#define NODE_H_
 
 #include "Token.h"
 
-class TreeNode {
+class Node {
 public:
-	TreeNode();
-	virtual ~TreeNode();
+	Node();
+	virtual ~Node();
 	Token value;
-	TreeNode* right;
-	TreeNode* left;
-	TreeNode* next;
+	Node* right;
+	Node* left;
+	Node* next;
 };
 
-#endif /* TREENODE_H_ */
+#endif /* NODE_H_ */
 

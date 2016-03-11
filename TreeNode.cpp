@@ -1,12 +1,12 @@
 
 #include "TreeNode.h"
 
-TreeNode::TreeNode() {
+Node::Node() {
 	right = NULL;
 	left = NULL;
 }
 
-TreeNode::~TreeNode() {
+Node::~Node() {
 	if(right != NULL)
 		delete right;
 	if(left != NULL)

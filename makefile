@@ -18,7 +18,7 @@ RecursiveParser.o : RecursiveParser.cpp RecursiveParser.h Token.h
 Token.o : Token.cpp Token.h
 	g++ -c Token.cpp
 
-TreeNode.o : TreeNode.cpp TreeNode.h
+Node.o : TreeNode.cpp TreeNode.h
 	g++ -c TreeNode.cpp
 
 run :

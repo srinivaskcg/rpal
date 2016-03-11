@@ -79,11 +79,11 @@ Token Lexer::tokenizeIdentifier(char ch){
 		while(true){
 			if(readPtr != size){
 				ch = codeString.at(readPtr++);
-				if(isalpha(ch) || isdigit(ch) || ch == '_'){
-					t.value +=ch;
-				}else{
+				if(!isalpha(ch) && !isdigit(ch) && ch != '_'){
 					readPtr--;
 					break;
+				}else{
+					t.value +=ch;
 				}
 			}else{
 				break;
@@ -102,16 +102,16 @@ Token Lexer::tokenizeInteger(char ch){
 	Token t;
 	t.value +=ch;
 	while(true){
-		if(readPtr != size){
+		if(readPtr == size){
+			break;
+		}else{
 			ch = codeString.at(readPtr++);
-			if(isdigit(ch)){
-				t.value +=ch;
-			}else{
+			if(!isdigit(ch)){
 				readPtr--;
 				break;
+			}else{
+				t.value +=ch;
 			}
-		}else{
-			break;
 		}
 	}
 	t.type = "INT";
@@ -119,16 +119,16 @@ Token Lexer::tokenizeInteger(char ch){
 }
 
 Token Lexer::tokenizeString(char ch){
-	
+
 	Token t;
 	t.value += ch;
 	while(true){
 		ch = codeString.at(readPtr++);
 		if(ch == '\\'){
-			char ch1 = codeString.at(readPtr++);
-			if(ch1 =='t' || ch1 == 'n' || ch1=='\\' || ch1=='\''){
+			char nextCh = codeString.at(readPtr++);
+			if(nextCh =='t' || nextCh == 'n' || nextCh=='\\' || nextCh=='\''){
 				t.value += ch;
-				t.value += ch1;
+				t.value += nextCh;
 			}else{
 				throw "Problem with creating <STRING> token";
 			}
@@ -136,7 +136,7 @@ Token Lexer::tokenizeString(char ch){
 			t.value +=ch;
 			t.type ="STRING";			
 			break;
-		} else if(isalpha(ch) || isdigit(ch) || isoperator(ch) || ch==')' || ch=='(' || ch==';' || ch==','
+		}else if(isalpha(ch) || isdigit(ch) || isoperator(ch) || ch==')' || ch=='(' || ch==';' || ch==','
 				|| isspace(ch)){
 			t.value +=ch;
 		}
@@ -150,32 +150,32 @@ Token Lexer::tokenizeOperator(char ch){
 	Token t;
 
 	if(ch == '/' && codeString.at(readPtr++) == '/'){
-	while(true){
-		ch = codeString.at(readPtr++);
-		if(ch == '\n'){
-			readPtr--;
-			break;
-		}else if(isalpha(ch) || isdigit(ch) || isoperator(ch) || ch == ' ' || ch=='\t'
-				|| ch=='\'' || ch == '(' || ch==')' || ch==';' || ch==',' || ch=='\\'){
-			continue;
+		while(true){
+			ch = codeString.at(readPtr++);
+			if(ch == '\n'){
+				readPtr--;
+				break;
+			}else if(isalpha(ch) || isdigit(ch) || isoperator(ch) || ch == ' ' || ch=='\t'
+					|| ch=='\'' || ch == '(' || ch==')' || ch==';' || ch==',' || ch=='\\'){
+				continue;
+			}
 		}
-	}
-	tokenizeStr();
+		tokenizeStr();
 	}else{
 		if(ch == '/')
 			readPtr--;
 		t.value +=ch;
 		while(true){
-			if(readPtr != size){
+			if(readPtr == size){
+				break;
+			}else{
 				ch = codeString.at(readPtr++);
-				if(isoperator(ch)){
-					t.value +=ch;
-				}else{
+				if(!isoperator(ch)){
 					readPtr--;
 					break;
+				}else{
+					t.value +=ch;
 				}
-			}else{
-				break;
 			}
 		}
 		t.type = "OPERATOR";
