@@ -26,7 +26,7 @@ class Parser
 		void formattedPrint(Token t,std::string dots);
 		void preOrder(TreeNode* t, std::string dots);
 		void readToken(Token token);
-		void treeBuilder(Token token, int popNodesCnt);
+		void treeBuilder(string tokenVal, int popNodesCnt);
 		void E();
 		void Ew();
 		void T();
