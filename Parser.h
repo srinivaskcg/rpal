@@ -1,23 +1,18 @@
-#ifndef RECURSIVEPARSER_H_
-#define RECURSIVEPARSER_H_
+#ifndef PARSER_H_
+#define PARSER_H_
 
 #include <string>
-#include "Token.h"
-#include "TreeNode.h"
-#include "LexicalAnalyzer.h"
 #include <stack>
 #include <cstdlib>
+#include "Token.h"
+#include "Node.h"
+#include "Lexer.h"
 
 using namespace std;
 
 class Parser
 {
 	private:
-		static string ID;
-		static string STR;
-		static string INT;
-		static string KEY;
-		static string OPT;
 		Lexer la;
 		bool moreTokens;
 		stack<Node *> trees;
@@ -50,9 +45,8 @@ class Parser
 		void Vl();
 	public:
 		Parser(Lexer la);
-		~Parser();
 		void printTree();
 		void parse();
 };
 
-#endif /*End of Parser*/
+#endif // PARSER_H_

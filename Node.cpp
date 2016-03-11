@@ -1,5 +1,5 @@
 
-#include "TreeNode.h"
+#include "Node.h"
 
 Node::Node() {
 	right = NULL;

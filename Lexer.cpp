@@ -1,57 +1,31 @@
 #include <iostream>
-#include "LexicalAnalyzer.h"
+#include "Lexer.h"
 #include "Token.h"
 #include <string>
 #include <set>
 #include <cstdlib>
-
 using namespace std;
 
-Lexer::Lexer(std::string codeString) {
-	this->codeString = codeString;
-	this->size = codeString.size();
-	this->readPtr = 0;
+Lexer::Lexer(string inputString) {
+	this->inputString = inputString;
+	this->size = inputString.size();
+	this->presentVal = 0;
 	this->currPtr = 0;
 }
 
-Lexer::~Lexer() {
-
-}
-
 Token Lexer::getNextToken(){
-
-	//cout << "Inside get next" << endl;
-	//cout << currPtr << endl;
-
 	Token t = tokens[currPtr++];
-	//cout << t.value << "\t" << t.type << endl;
 	return t;
 }
 
 void Lexer::tokenizeStr()
 {
-
-	//cout << "Inside Tokenizer" << endl;
-	size = codeString.size();
-	//cout << size << endl;
-	//readPtr = 0;
-	//If next character is a space, ignore
-	//If next character is a letter, go to case: identifier
-	//If next character is a digit, go to Integer
-	//If next character is a operator go to operator
-	//If next character is a //, go to comment section
-	//Handle punctuation characters
-	//Handle String if next character start with ''
-	while(readPtr < size){
-		//cout << "Intial ptr value "<< readPtr << endl;
-		/*if(readPtr == size){
-			cout << "No more tokens";
-			break;
-		}*/
+	size = inputString.size();
+	while(presentVal < size){
 
 		Token token;
 		
-		char ch = codeString.at(readPtr++);
+		char ch = inputString.at(presentVal++);
 
 		if(isspace(ch) || ch == '\t' || ch == '\n'){
 			continue;
@@ -59,7 +33,7 @@ void Lexer::tokenizeStr()
 			token = tokenizeIdentifier(ch);
 		}else if(isdigit(ch)){
 			token = tokenizeInteger(ch);
-		}else if (isoperator(ch)){
+		}else if (anOperator(ch)){
 			token = tokenizeOperator(ch);
 		}else if(ch == '\''){
 			token = tokenizeString(ch);			
@@ -69,7 +43,6 @@ void Lexer::tokenizeStr()
 		tokens.push_back(token);
 		//cout << token.type << "\t" << token.value << endl;
 	}
-
 }
 
 Token Lexer::tokenizeIdentifier(char ch){
@@ -77,10 +50,10 @@ Token Lexer::tokenizeIdentifier(char ch){
 	Token t;
 	t.value +=ch;
 		while(true){
-			if(readPtr != size){
-				ch = codeString.at(readPtr++);
+			if(presentVal != size){
+				ch = inputString.at(presentVal++);
 				if(!isalpha(ch) && !isdigit(ch) && ch != '_'){
-					readPtr--;
+					presentVal--;
 					break;
 				}else{
 					t.value +=ch;
@@ -102,12 +75,12 @@ Token Lexer::tokenizeInteger(char ch){
 	Token t;
 	t.value +=ch;
 	while(true){
-		if(readPtr == size){
+		if(presentVal == size){
 			break;
 		}else{
-			ch = codeString.at(readPtr++);
+			ch = inputString.at(presentVal++);
 			if(!isdigit(ch)){
-				readPtr--;
+				presentVal--;
 				break;
 			}else{
 				t.value +=ch;
@@ -123,9 +96,9 @@ Token Lexer::tokenizeString(char ch){
 	Token t;
 	t.value += ch;
 	while(true){
-		ch = codeString.at(readPtr++);
+		ch = inputString.at(presentVal++);
 		if(ch == '\\'){
-			char nextCh = codeString.at(readPtr++);
+			char nextCh = inputString.at(presentVal++);
 			if(nextCh =='t' || nextCh == 'n' || nextCh=='\\' || nextCh=='\''){
 				t.value += ch;
 				t.value += nextCh;
@@ -133,12 +106,12 @@ Token Lexer::tokenizeString(char ch){
 				throw "Problem with creating <STRING> token";
 			}
 		}else if(ch == '\''){
-			t.value +=ch;
-			t.type ="STRING";			
+			t.value += ch;
+			t.type = "STRING";			
 			break;
-		}else if(isalpha(ch) || isdigit(ch) || isoperator(ch) || ch==')' || ch=='(' || ch==';' || ch==','
+		}else if(isalpha(ch) || isdigit(ch) || anOperator(ch) || ch==')' || ch=='(' || ch==';' || ch==','
 				|| isspace(ch)){
-			t.value +=ch;
+			t.value += ch;
 		}
 	}
 	return t;
@@ -149,13 +122,13 @@ Token Lexer::tokenizeOperator(char ch){
 	
 	Token t;
 
-	if(ch == '/' && codeString.at(readPtr++) == '/'){
+	if(ch == '/' && inputString.at(presentVal++) == '/'){
 		while(true){
-			ch = codeString.at(readPtr++);
+			ch = inputString.at(presentVal++);
 			if(ch == '\n'){
-				readPtr--;
+				presentVal--;
 				break;
-			}else if(isalpha(ch) || isdigit(ch) || isoperator(ch) || ch == ' ' || ch=='\t'
+			}else if(isalpha(ch) || isdigit(ch) || anOperator(ch) || ch == ' ' || ch=='\t'
 					|| ch=='\'' || ch == '(' || ch==')' || ch==';' || ch==',' || ch=='\\'){
 				continue;
 			}
@@ -163,15 +136,15 @@ Token Lexer::tokenizeOperator(char ch){
 		tokenizeStr();
 	}else{
 		if(ch == '/')
-			readPtr--;
+			presentVal--;
 		t.value +=ch;
 		while(true){
-			if(readPtr == size){
+			if(presentVal == size){
 				break;
 			}else{
-				ch = codeString.at(readPtr++);
-				if(!isoperator(ch)){
-					readPtr--;
+				ch = inputString.at(presentVal++);
+				if(!anOperator(ch)){
+					presentVal--;
 					break;
 				}else{
 					t.value +=ch;
@@ -191,52 +164,40 @@ Token Lexer::tokenizePunctuation(char ch){
 }
 
 Token Lexer::peekNextToken(){
-	//cout << "Inside peek" << "\t" << currPtr << "\t" << size << endl;
-
-	//if(currPtr == size)
-	//	throw "No more tokens";
 	Token t = tokens[currPtr];
-	/*int count = t.value.size();
-	while(count-- !=0){
-		readPtr--;
-	}*/
 	return t;
 }
 
-
-bool Lexer::isoperator(char ch){
+bool Lexer::anOperator(char ch){
 
 	char char_set[] = {'+','-','*','<','>','&','.','@','/',':','=','-','|','$','!','#','%','^','_','[',']','{','}','"','`','?'};
 	
+	/*for (char element : operator_set) {
+		if (element == ch){
+			return true;
+		}
+	}
+	return false;*/
+
 	set<char> ops;   
 	ops.insert(char_set, char_set+26);
-
 	if(ops.count(ch) > 0)
 		return true;
-
 	return false;
 }
 
 bool Lexer::isKeyword(string tokenValue){
-	
 	string keyword_set[] = {"let","in","fn","where","aug","or","not","gr","ge","ls","le","eq","ne","true","false","nil","dummy",
 							"within","and","rec","list"};
-
 	set<string> keys;   
 	keys.insert(keyword_set, keyword_set+21);
-
 	if(keys.count(tokenValue) > 0)
 		return true;
-
 	return false;
 }
 
 void Lexer::operator=(const Lexer& laObj){
-	this->codeString = laObj.codeString;
+	this->inputString = laObj.inputString;
 	this->size = laObj.size;
-	this->readPtr = laObj.readPtr;
-}
-
-Lexer::Lexer(){
-
+	this->presentVal = laObj.presentVal;
 }

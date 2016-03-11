@@ -5,22 +5,21 @@
 
 using namespace std;
 
-#ifndef LEXICALANALYZER_H_
-#define LEXICALANALYZER_H_
+#ifndef LEXER_H_
+#define LEXER_H_
 
 class Lexer {
 	private:
-		string codeString;
+		string inputString;
 		int size;
-		int readPtr;
-		bool isoperator(char ch);
+		int presentVal;
+		bool anOperator(char ch);
 		bool isKeyword(string tokenValue);
 
 	public:
-		Lexer(string codeString);
-		Lexer();
-		void operator=(const Lexer& laObj);
-		virtual ~Lexer();
+		Lexer(string inputString);
+		Lexer(){}
+		void operator = (const Lexer& laObj);
 		Token getNextToken();
 		void tokenizeStr();
 		Token peekNextToken();
@@ -33,4 +32,4 @@ class Lexer {
 		Token tokenizePunctuation(char ch);
 };
 
-#endif /* LEXICALANALYZER_H_ */
+#endif // LEXER_H_ 

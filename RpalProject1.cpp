@@ -2,8 +2,8 @@
 #include <fstream>
 #include <stdio.h>
 #include <string.h>
-#include "LexicalAnalyzer.h"
-#include "RecursiveParser.h"
+#include "Lexer.h"
+#include "Parser.h"
 
 using namespace std;
 
@@ -63,9 +63,8 @@ int main(int argc,char *argv[]) {
 		Lexer la(code_string);
 		Parser rp(la);
 		rp.parse();
-		rp.printTree();
 	}else{
-		cout<< "Usage: p1 -ast fileLocation"<<endl;
+		cout << "How to run: p1 -ast location" << endl;
 	}
 	return 0;
 }

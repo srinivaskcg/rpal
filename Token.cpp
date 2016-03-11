@@ -1,23 +1,12 @@
-/*
- * Token.cpp
- *
- *  Created on: Oct 14, 2011
- *      Author: Saurabh Saxena
- *      // UFID        : 21817195
- */
-
 #include "Token.h"
 
-Token::Token() {
-	// TODO Auto-generated constructor stub
+using namespace std;
 
-}
+Token::Token() {}
 
-Token::Token(std::string value, std::string type){
+Token::Token(string value, string type){
 	this->value = value;
 	this->type = type;
 }
 
-Token::~Token() {
-	// TODO Auto-generated destructor stub
-}
+Token::~Token() {}
