@@ -1,3 +1,7 @@
+//
+//  LexParser.h
+//
+//  Created by Srinivas Gubbala on 3/5/16.
 
 #ifndef LEXPARSER_H_
 #define LEXPARSER_H_
@@ -30,39 +34,58 @@ class LexParser {
 		string inputString;
 		int size;
 		int presentVal;
+		int currPtr;
+		vector<Token> tokens;
+		Token nt;
 		bool tokensLeft;
 		stack<Node *> trees;
-		Token nt;
 
 		bool anOperator(char c);
 		bool aKeyword(string tokenValue);
 		bool aComment(char c);
 		bool aPunctuation(char c);
-		void makeRightNode(Node* t);
-		void formattedPrint(Token t,std::string dots);
-		void preOrdTraversal(Node* t, std::string dots);
+
+		void tokenizeStr();
+		Token tokenizeIdentifier(char ch);
+		Token tokenizeInteger(char ch);
+		Token tokenizeOperator(char ch);
+		Token tokenizeString(char ch);
+		Token tokenizePunctuation(char ch);
 		void readToken(Token token);
+		Token getNextToken();
+		Token peekNextToken();
+
+		void makeRightNode(Node* t);
+		void preOrdTraversal(Node* t, std::string dots);
 		void treeBuilder(string tokenVal, int popNodesCnt);
+		void printTree();
+		void formattedPrint(Token t,std::string dots);
 		
 		void E();
 		void Ew();
+
 		void T();
 		void Ta();
 		void Tc();
+		
 		void B();
 		void Bt();
 		void Bs();
 		void Bp();
+		
 		void A();
 		void At();
 		void Af();
 		void Ap();
+		
 		void R();
 		void Rn();
+		
 		void D();
 		void Da();
 		void Dr();
 		void Db();
+		
 		void Vb();
 		void Vl();
 
@@ -70,21 +93,6 @@ class LexParser {
 		LexParser(string inputString);
 		LexParser(){}
 
-		vector<Token> tokens;
-		int currPtr;
-
-		Token getNextToken();
-		Token peekNextToken();
-		
-		void tokenizeStr();
-		
-		Token tokenizeIdentifier(char ch);
-		Token tokenizeInteger(char ch);
-		Token tokenizeOperator(char ch);
-		Token tokenizeString(char ch);
-		Token tokenizePunctuation(char ch);
-
-		void printTree();
 		void parse();
 };
 

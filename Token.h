@@ -1,3 +1,8 @@
+//
+//  Token.h
+//
+//  Created by Srinivas Gubbala on 3/4/16.
+
 #ifndef TOKEN_H_
 #define TOKEN_H_
 
@@ -5,6 +10,7 @@
 using namespace std;
 
 class Token {
+
 public:
 	Token();
 	Token(string value, string type);
