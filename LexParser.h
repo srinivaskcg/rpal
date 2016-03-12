@@ -30,14 +30,14 @@ class LexParser {
 		string inputString;
 		int size;
 		int presentVal;
-		bool moreTokens;
+		bool tokensLeft;
 		stack<Node *> trees;
-		Token nextToken;
+		Token nt;
 
-		bool anOperator(char ch);
+		bool anOperator(char c);
 		bool aKeyword(string tokenValue);
-		bool aComment(char ch);
-		bool aPunctuation(char ch);
+		bool aComment(char c);
+		bool aPunctuation(char c);
 		void makeRightNode(Node* t);
 		void formattedPrint(Token t,std::string dots);
 		void preOrdTraversal(Node* t, std::string dots);

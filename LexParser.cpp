@@ -12,12 +12,12 @@ LexParser::LexParser(string inputString) {
 	this->size = inputString.size();
 	this->presentVal = 0;
 	this->currPtr = 0;
-	this->moreTokens = true;
+	this->tokensLeft = true;
 }
 
 void LexParser::parse(){
 	tokenizeStr();
-	nextToken = getNextToken();
+	nt = getNextToken();
 	E();
 	printTree();
 }
@@ -28,39 +28,39 @@ void LexParser::tokenizeStr()
 
 		Token token;
 		
-		char ch = inputString.at(presentVal++);
-		//cout << ch << endl;
+		char c = inputString.at(presentVal++);
+		//cout << c << endl;
 
-		if(isspace(ch) || ch == '\t' || ch == '\n'){
+		if(isspace(c) || c == '\t' || c == '\n'){
 			continue;
-		}else if(isalpha(ch)){
-			token = tokenizeIdentifier(ch);
-		}else if(isdigit(ch)){
-			token = tokenizeInteger(ch);
-		}else if (anOperator(ch)){
-			token = tokenizeOperator(ch);
-		}else if(ch == '\''){
-			token = tokenizeString(ch);			
-		}else if(ch == '(' || ch == ')' || ch == ';' || ch == ','){
-			token = tokenizePunctuation(ch);
+		}else if(isalpha(c)){
+			token = tokenizeIdentifier(c);
+		}else if(isdigit(c)){
+			token = tokenizeInteger(c);
+		}else if (anOperator(c)){
+			token = tokenizeOperator(c);
+		}else if(c == '\''){
+			token = tokenizeString(c);			
+		}else if(c == '(' || c == ')' || c == ';' || c == ','){
+			token = tokenizePunctuation(c);
 		}
 		tokens.push_back(token);
 		//cout << token.type << "\t" << token.value << endl;
 	}
 }
 
-Token LexParser::tokenizeIdentifier(char ch){
+Token LexParser::tokenizeIdentifier(char c){
 
 	Token t;
-	t.value +=ch;
+	t.value += c;
 		while(true){
 			if(presentVal != size){
-				ch = inputString.at(presentVal++);
-				if(!isalpha(ch) && !isdigit(ch) && ch != '_'){
+				c = inputString.at(presentVal++);
+				if(!isalpha(c) && !isdigit(c) && c != '_'){
 					presentVal--;
 					break;
 				}else{
-					t.value +=ch;
+					t.value += c;
 				}
 			}else{
 				break;
@@ -74,20 +74,20 @@ Token LexParser::tokenizeIdentifier(char ch){
 	return t;
 }
 
-Token LexParser::tokenizeInteger(char ch){
+Token LexParser::tokenizeInteger(char c){
 
 	Token t;
-	t.value +=ch;
+	t.value += c;
 	while(true){
 		if(presentVal == size){
 			break;
 		}else{
-			ch = inputString.at(presentVal++);
-			if(!isdigit(ch)){
+			c = inputString.at(presentVal++);
+			if(!isdigit(c)){
 				presentVal--;
 				break;
 			}else{
-				t.value +=ch;
+				t.value +=c;
 			}
 		}
 	}
@@ -95,84 +95,88 @@ Token LexParser::tokenizeInteger(char ch){
 	return t;
 }
 
-Token LexParser::tokenizeString(char ch){
+Token LexParser::tokenizeString(char c){
 
 	Token t;
-	t.value += ch;
+	t.value = c;
 	while(true){
-		ch = inputString.at(presentVal++);
-		if(ch == '\\'){
-			char nextCh = inputString.at(presentVal++);
-			if(aComment(nextCh)){
-				t.value += ch;
-				t.value += nextCh;
+		c = inputString.at(presentVal++);
+		if(c == '\\'){
+			char nextc = inputString.at(presentVal++);
+			if(aComment(nextc)){
+				t.value += c;
+				t.value += nextc;
 			}else{
-				throw "Problem with creating <STRING> token";
+				throw "unable to create <STRING> token";
 			}
-		}else if(ch == '\''){
-			t.value += ch;
+		}else if(c == '\''){
+			t.value += c;
 			t.type = "STRING";			
 			break;
-		}else if(aPunctuation(ch)){
-			t.value += ch;
+		}else if(aPunctuation(c)){
+			t.value += c;
 		}
 	}
 	return t;
 }
 
-bool LexParser::aComment(char ch){
-	if(ch=='\\' || ch=='\'' || ch =='t' || ch == 'n')
+bool LexParser::aComment(char c){
+	if(c=='\\' || c=='\'' || c=='t' || c== 'n')
 		return true;
 	return false;
 }
 
-bool LexParser::aPunctuation(char ch){
-	if(ch=='(' || ch==')' || ch==';' || ch==',' || ch == ' ' || isalpha(ch) || isdigit(ch) || anOperator(ch))
+bool LexParser::aPunctuation(char c){
+	if(c=='(' || c==')' || c==';' || c==',' || c== ' ' || isalpha(c) || isdigit(c) || anOperator(c))
 		return true;
 	return false;
 }
 
-Token LexParser::tokenizeOperator(char ch){
+Token LexParser::tokenizeOperator(char c){
 	
 	Token t;
 
-	if(ch == '/' && inputString.at(presentVal++) == '/'){
-		while(true){
-			ch = inputString.at(presentVal++);
-			if(ch == '\n'){
-				presentVal--;
-				break;
-			}else if(anOperator(ch) || aPunctuation(ch) || aComment(ch)){
-				continue;
-			}
-		}
-		tokenizeStr();
-	}else{
-		if(ch == '/')
-			presentVal--;
-		t.value +=ch;
-		while(true){
-			if(presentVal == size){
-				break;
-			}else{
-				ch = inputString.at(presentVal++);
-				if(!anOperator(ch)){
+	if(c == '/'){
+		if(inputString.at(presentVal++) == '/'){
+			while(true){
+				c = inputString.at(presentVal++);
+				
+				if(anOperator(c) || aPunctuation(c) || aComment(c)){
+					continue;
+				}
+				else if(c == '\n'){
 					presentVal--;
 					break;
-				}else{
-					t.value +=ch;
 				}
 			}
+			tokenizeStr();
 		}
-		t.type = "OPERATOR";
+		else
+			presentVal--;
 	}
+	t.value +=c;
+	while(true){
+		if(presentVal == size){
+			break;
+		}else{
+			c = inputString.at(presentVal++);
+			if(!anOperator(c)){
+				presentVal--;
+				break;
+			}else{
+				t.value +=c;
+			}
+		}
+	}
+	t.type = "OPERATOR";
+	
 	return t;
 }
 
-Token LexParser::tokenizePunctuation(char ch){
+Token LexParser::tokenizePunctuation(char c){
 	Token t;
-	t.type = ch;
-	t.value = ch;
+	t.type = c;
+	t.value = c;
 	return t;
 }
 
@@ -192,8 +196,8 @@ Token LexParser::peekNextToken(){
 	return t;
 }
 
-bool LexParser::anOperator(char ch) {
-  return operator_set.find(ch) != operator_set.end();
+bool LexParser::anOperator(char c) {
+  return operator_set.find(c) != operator_set.end();
 }
 
 bool LexParser::aKeyword(string st) {
@@ -209,24 +213,20 @@ void LexParser::makeRightNode(Node* node){
 
 void LexParser::readToken(Token token){
 
-	//cout << "Inside read" << "\t" <<token.type << "\t" << token.value << "\t" << nextToken.value<< endl;
-	if(moreTokens == false)
-		throw "Error: No more token to parse";
-	if(token.value != nextToken.value){
+	if(token.value != nt.value){
 		exit(1);
 	}
-	if(token.type == "IDENTIFIER"){
-		treeBuilder("<ID:" + token.value + ">", 0);
-	}
-	else if(token.type == "STRING"){
-		treeBuilder("<STR:" + token.value + ">", 0);
-	} 
-	else if(token.type == "INT"){
+
+	if(token.type == "INT")
 		treeBuilder("<INT:" + token.value + ">", 0);	
-	}
-	nextToken = getNextToken();
+	else if(token.type == "IDENTIFIER")
+		treeBuilder("<ID:" + token.value + ">", 0);
+	else if(token.type == "STRING")
+		treeBuilder("<STR:" + token.value + ">", 0);
 	
-	if(nextToken.value == "END")
+	nt = getNextToken();
+	
+	if(nt.value == "END" || tokensLeft == false)
 		throw "All tokens parsed";
 }
 
@@ -252,7 +252,7 @@ void LexParser::treeBuilder(string tokenVal, int popTreeCnt){
 }
 
 void LexParser::E(){
-	if(nextToken.value == "let"){
+	if(nt.value == "let"){
 		Token letToken("let","KEYWORD");
 		readToken(letToken);
 		D();
@@ -260,18 +260,18 @@ void LexParser::E(){
 		readToken(inToken);
 		E();
 		treeBuilder("let",2);
-	} else if(nextToken.value == "fn"){
+	} else if(nt.value == "fn"){
 		Token fnToken("fn","fn");
 		readToken(fnToken);
-		int n=0;
-		do{
+		int n=1;
+		while(nt.type == "IDENTIFIER" || nt.type == "("){
 			Vb();
 			n++;
-		}while(nextToken.type == "IDENTIFIER" || nextToken.type == "(");
+		}
 		Token dotToken(".","OPERATOR");
 		readToken(dotToken);
 		E();
-		treeBuilder("lambda",n+1);
+		treeBuilder("lambda",n);
 	} else{
 		Ew();
 	}
@@ -279,7 +279,7 @@ void LexParser::E(){
 
 void LexParser::Ew(){
 	T();
-	if(nextToken.value == "where"){
+	if(nt.value == "where"){
 		Token t("where","KEYWORD");
 		readToken(t);
 		Dr();
@@ -289,22 +289,22 @@ void LexParser::Ew(){
 
 void LexParser::T(){
 	Ta();
-	if(nextToken.value == ","){
-		int n = 0;
-		do{
-			readToken(nextToken);
+	if(nt.value == ","){
+		int vars = 1;
+		while(nt.value == ","){
+			readToken(nt);
 			Ta();
-			n++;
-		}while(nextToken.value == ",");
-		treeBuilder("tau",n+1);
+			vars++;
+		}
+		treeBuilder("tau",vars);
 	}
 }
 
 void LexParser::Ta(){
 	Tc();
-	while(nextToken.value == "aug"){
-		Token temp = nextToken;
-		readToken(nextToken);
+	while(nt.value == "aug"){
+		Token temp = nt;
+		readToken(nt);
 		Tc();
 		treeBuilder("aug",2);
 	}
@@ -312,8 +312,8 @@ void LexParser::Ta(){
 
 void LexParser::Tc(){
 	B();
-	if(nextToken.value == "->"){
-		readToken(nextToken);
+	if(nt.value == "->"){
+		readToken(nt);
 		Tc();
 		Token elseToken("|","OPERATOR");
 		readToken(elseToken);
@@ -324,9 +324,9 @@ void LexParser::Tc(){
 
 void LexParser::B(){
 	Bt();
-	while(nextToken.value == "or"){
-		Token temp = nextToken;
-		readToken(nextToken);
+	while(nt.value == "or"){
+		Token temp = nt;
+		readToken(nt);
 		Bt();
 		treeBuilder("or",2);
 	}
@@ -334,18 +334,18 @@ void LexParser::B(){
 
 void LexParser::Bt(){
 	Bs();
-	while(nextToken.value == "&"){
-		Token temp = nextToken;
-		readToken(nextToken);
+	while(nt.value == "&"){
+		Token temp = nt;
+		readToken(nt);
 		Bs();
 		treeBuilder("&",2);
 	}
 }
 
 void LexParser::Bs(){
-	if(nextToken.value == "not"){
-		Token temp = nextToken;
-		readToken(nextToken);
+	if(nt.value == "not"){
+		Token temp = nt;
+		readToken(nt);
 		Bp();
 		treeBuilder("not",1);
 	}else{
@@ -355,49 +355,49 @@ void LexParser::Bs(){
 
 void LexParser::Bp(){
 	A();
-	if(nextToken.value=="gr" || nextToken.value == ">"){
-		readToken(nextToken);
+	if(nt.value=="gr" || nt.value == ">"){
+		readToken(nt);
 		A();
 		treeBuilder("gr",2);
-	}else if(nextToken.value == "ls" || nextToken.value == "<"){
-		readToken(nextToken);
+	}else if(nt.value == "ls" || nt.value == "<"){
+		readToken(nt);
 		A();
 		treeBuilder("ls",2);
-	}else if(nextToken.value =="ge" || nextToken.value == ">=" ){
-		readToken(nextToken);
+	}else if(nt.value =="ge" || nt.value == ">=" ){
+		readToken(nt);
 		A();
 		treeBuilder("ge",2);
-	}else if(nextToken.value =="le" || nextToken.value == "<=" ){
-		readToken(nextToken);
+	}else if(nt.value =="le" || nt.value == "<=" ){
+		readToken(nt);
 		A();
 		treeBuilder("le",2);
-	}else if(nextToken.value =="eq" ){
-		readToken(nextToken);
+	}else if(nt.value =="eq" ){
+		readToken(nt);
 		A();
 		treeBuilder("eq",2);
-	}else if(nextToken.value =="ne"){
-		readToken(nextToken);
+	}else if(nt.value =="ne"){
+		readToken(nt);
 		A();
 		treeBuilder("ne",2);
 	}
 }
 
 void LexParser::A(){
-	if(nextToken.value == "-"){
+	if(nt.value == "-"){
 		Token negToken("-","OPERATOR");
 		readToken(negToken);
 		At();
 		treeBuilder("neg",1);
-	}else if(nextToken.value == "+"){
+	}else if(nt.value == "+"){
 		Token posToken("+","OPERATOR");
 		readToken(posToken);
 		At();
 	}else{
 		At();
 	}
-	while(nextToken.value == "+" || nextToken.value == "-"){
-		Token tmp = nextToken;
-		readToken(nextToken);
+	while(nt.value == "+" || nt.value == "-"){
+		Token tmp = nt;
+		readToken(nt);
 		At();
 		treeBuilder(tmp.value,2);
 	}
@@ -405,9 +405,9 @@ void LexParser::A(){
 
 void LexParser::At(){
 	Af();
-	while(nextToken.value == "*" || nextToken.value=="/"){
-		Token temp = nextToken;
-		readToken(nextToken);
+	while(nt.value == "*" || nt.value=="/"){
+		Token temp = nt;
+		readToken(nt);
 		Af();
 		treeBuilder(temp.value,2);
 	}
@@ -415,9 +415,9 @@ void LexParser::At(){
 
 void LexParser::Af(){
 	Ap();
-	while(nextToken.value == "**"){
-		Token temp = nextToken;
-		readToken(nextToken);
+	while(nt.value == "**"){
+		Token temp = nt;
+		readToken(nt);
 		Af();
 		treeBuilder(temp.value,2);
 	}
@@ -425,12 +425,12 @@ void LexParser::Af(){
 
 void LexParser::Ap(){
 	R();
-	while(nextToken.value == "@"){
-		Token temp = nextToken;
-		readToken(nextToken); 
-		if(nextToken.type != "IDENTIFIER")
+	while(nt.value == "@"){
+		Token temp = nt;
+		readToken(nt); 
+		if(nt.type != "IDENTIFIER")
 			throw "Expected Identifier found in parseAp()";
-		readToken(nextToken); 
+		readToken(nt); 
 		R();
 		treeBuilder(temp.value,3);
 	}
@@ -438,31 +438,31 @@ void LexParser::Ap(){
 
 void LexParser::R(){
 	Rn();
-	while(nextToken.type == "IDENTIFIER" || nextToken.type == "STRING" || nextToken.type == "INT" ||
-			nextToken.value == "true" || nextToken.value == "false" || nextToken.value == "nil" ||
-			nextToken.value == "(" || nextToken.value == "dummy"){
+	while(nt.type == "IDENTIFIER" || nt.type == "STRING" || nt.type == "INT" ||
+			nt.value == "true" || nt.value == "false" || nt.value == "nil" ||
+			nt.value == "(" || nt.value == "dummy"){
 		Rn();
 		treeBuilder("gamma",2);
 	}
 }
 
 void LexParser::Rn(){
-	if(nextToken.type == "IDENTIFIER" || nextToken.type == "STRING" || nextToken.type == "INT" ){
-		readToken(nextToken);
-	}else if(nextToken.value=="true"){
-		readToken(nextToken);
+	if(nt.type == "IDENTIFIER" || nt.type == "STRING" || nt.type == "INT" ){
+		readToken(nt);
+	}else if(nt.value=="true"){
+		readToken(nt);
 		treeBuilder("true",0);
-	}else if(nextToken.value == "false"){
-		readToken(nextToken);
+	}else if(nt.value == "false"){
+		readToken(nt);
 		treeBuilder("false",0);
-	}else if(nextToken.value == "nil"){
-		readToken(nextToken);
+	}else if(nt.value == "nil"){
+		readToken(nt);
 		treeBuilder("nil",0);
-	}else if(nextToken.value == "dummy"){
-		readToken(nextToken);
+	}else if(nt.value == "dummy"){
+		readToken(nt);
 		treeBuilder("dummy",0);
-	}else if(nextToken.value == "("){
-		readToken(nextToken);
+	}else if(nt.value == "("){
+		readToken(nt);
 		E();
 		Token t(")",")");
 		readToken(t);
@@ -471,8 +471,8 @@ void LexParser::Rn(){
 
 void LexParser::D(){
 	Da();
-	if(nextToken.value == "within"){
-		readToken(nextToken);
+	if(nt.value == "within"){
+		readToken(nt);
 		D();
 		treeBuilder("within",2);
 	}
@@ -480,46 +480,46 @@ void LexParser::D(){
 
 void LexParser::Da(){
 	Dr();
-	if(nextToken.value== "and"){
+	if(nt.value== "and"){
 		int n = 0;
-		Token temp = nextToken;
+		Token temp = nt;
 		do{
-			readToken(nextToken);
+			readToken(nt);
 			Dr();
 			n++;
-		}while(nextToken.value == "and");
+		}while(nt.value == "and");
 		treeBuilder(temp.value,n+1);
 	}
 }
 
 void LexParser::Dr(){
-	if(nextToken.value != "rec"){
+	if(nt.value != "rec"){
 		Db();
 	}else{
-		Token temp = nextToken;
-		readToken(nextToken);
+		Token temp = nt;
+		readToken(nt);
 		Db();
 		treeBuilder(temp.value,1);
 	}
 }
 
 void LexParser::Db(){
-	if(nextToken.value == "("){
-		readToken(nextToken);
+	if(nt.value == "("){
+		readToken(nt);
 		D();
 		Token t(")","OPERATOR");
 		readToken(t);
-	} else if(nextToken.type == "IDENTIFIER" && (peekNextToken().value == "," || peekNextToken().value == "=")){
+	} else if(nt.type == "IDENTIFIER" && (peekNextToken().value == "," || peekNextToken().value == "=")){
 		Vl();
 		Token t("=","OPERATOR");
 		readToken(t);
 		E();
 		treeBuilder("=",2);
 	} else{
-		readToken(nextToken);
+		readToken(nt);
 		int chars = 1;
 		Vb();
-		while(nextToken.type == "IDENTIFIER" || nextToken.value== "("){
+		while(nt.type == "IDENTIFIER" || nt.value== "("){
 			chars++;
 			Vb();
 		}
@@ -531,12 +531,12 @@ void LexParser::Db(){
 }
 
 void LexParser::Vb(){
-	if(nextToken.type == "IDENTIFIER"){
-		readToken(nextToken);
-	}else if(nextToken.value == "("){
-		readToken(nextToken);
-		if(nextToken.value == ")"){
-			readToken(nextToken);
+	if(nt.type == "IDENTIFIER"){
+		readToken(nt);
+	}else if(nt.value == "("){
+		readToken(nt);
+		if(nt.value == ")"){
+			readToken(nt);
 			treeBuilder("()",0);
 		}else{
 			Vl();
@@ -547,15 +547,15 @@ void LexParser::Vb(){
 }
 
 void LexParser::Vl(){
-	readToken(nextToken);
-	if(nextToken.value == ","){
+	readToken(nt);
+	if(nt.value == ","){
 		int chars =0;
 		do{
 			chars++;
-			readToken(nextToken); 
-			readToken(nextToken); 
+			readToken(nt); 
+			readToken(nt); 
 		}
-		while(nextToken.value == ",");
+		while(nt.value == ",");
 		treeBuilder(",",chars+1);
 	}
 }
