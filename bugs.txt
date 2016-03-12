@@ -1,0 +1,16 @@
+How to use:
+----------
+
+Compile : make
+Clean   : make cl
+Run     : ./p1 [-l] [-ast] file
+
+To test all the programs against rpal:
+-------------------------------------
+
+perl difftest.pl -1 "./rpal -ast -noout FILE" -2 "./p1 -ast FILE" -t testDir/
+
+BUGS:
+-----
+
+Succesfully runs for all the test programs.
